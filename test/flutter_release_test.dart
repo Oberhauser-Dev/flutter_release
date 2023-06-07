@@ -2,7 +2,11 @@ import 'package:flutter_release/flutter_release.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('calculate', () {
-    expect(calculate(), 42);
+  test('release', () {
+    final release = FlutterRelease(
+        appName: 'test-app',
+        releaseType: ReleaseType.apk,
+        appVersion: 'v0.0.2');
+    expect(release.appVersion, 'v0.0.2');
   });
 }
