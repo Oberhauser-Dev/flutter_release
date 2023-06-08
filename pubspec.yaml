@@ -1,5 +1,5 @@
 name: flutter_release
-description: A tool for building, releasing and deploying Flutter apps.
+description: A tool for building, releasing, publishing and deploying Flutter apps.
 version: 0.0.2
 repository: https://github.com/Oberhauser-Dev/flutter_release
 
