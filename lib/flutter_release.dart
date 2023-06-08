@@ -168,8 +168,8 @@ class FlutterRelease {
     final debianAppName = appName.replaceAll('_', '-');
 
     final artifactPath = _getArtifactPath(platform: 'Linux', extension: 'deb');
-    final file =
-        File('build/linux/x64/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
+    final file = File(
+        'build/linux/x64/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
     file.rename(artifactPath);
     return artifactPath;
   }
