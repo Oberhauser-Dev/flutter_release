@@ -1,5 +1,7 @@
 import 'dart:io';
 
+/// Class which holds the necessary attributes to perform a release on various
+/// platforms for the specified [releaseType].
 class FlutterRelease {
   String appName;
   ReleaseType releaseType;
@@ -20,6 +22,7 @@ class FlutterRelease {
     this.installDeps = true,
   }) : buildVersion = buildVersion ?? appVersion.replaceFirst('v', '');
 
+  /// Release the app for the given platform release type.
   Future<String> release() async {
     await Directory(releaseFolder).create(recursive: true);
     switch (releaseType) {
@@ -234,6 +237,14 @@ class FlutterRelease {
   }
 }
 
+/// Release type:
+/// [apk] -> Android
+/// [web] -> Web
+/// [ipa] -> iOS
+/// [macos] -> macOS
+/// [windows] -> Windows
+/// [linux] -> Linux
+/// [debian] -> Linux
 enum ReleaseType {
   apk,
   web,
