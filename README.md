@@ -4,7 +4,7 @@ A tool for building, releasing, publishing and deploying Flutter apps.
 
 ## Example
 
-```
+```shell
 dart pub global run flutter_release \
  --app-name example \
  --app-version v0.0.4 \
