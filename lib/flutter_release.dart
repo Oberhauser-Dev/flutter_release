@@ -69,7 +69,7 @@ class FlutterRelease {
     await _build(buildCmd: 'apk');
 
     final artifactPath =
-        _getArtifactPath(platform: 'Android', extension: 'apk');
+        _getArtifactPath(platform: 'android', extension: 'apk');
     final file = File('build/app/outputs/flutter-apk/app-release.apk');
     file.rename(artifactPath);
     return artifactPath;
@@ -114,7 +114,7 @@ class FlutterRelease {
     await _build(buildCmd: 'linux');
 
     final artifactPath =
-        _getArtifactPath(platform: 'Linux', extension: 'tar.gz');
+        _getArtifactPath(platform: 'linux', extension: 'tar.gz');
     final ProcessResult result = await Process.run(
       'tar',
       [
@@ -170,7 +170,7 @@ class FlutterRelease {
 
     final debianAppName = appName.replaceAll('_', '-');
 
-    final artifactPath = _getArtifactPath(platform: 'Linux', extension: 'deb');
+    final artifactPath = _getArtifactPath(platform: 'linux', extension: 'deb');
     final file = File(
         'build/linux/x64/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
     file.rename(artifactPath);
@@ -180,7 +180,7 @@ class FlutterRelease {
   Future<String> _buildMacOs() async {
     await _build(buildCmd: 'macos');
 
-    final artifactPath = _getArtifactPath(platform: 'macOS', extension: 'app');
+    final artifactPath = _getArtifactPath(platform: 'macos', extension: 'app');
     final file = File('build/macos/Build/Products/Release/$appName.app');
     file.rename(artifactPath);
     return artifactPath;
@@ -190,7 +190,7 @@ class FlutterRelease {
     await _build(buildCmd: 'windows');
 
     final artifactPath =
-        _getArtifactPath(platform: 'Windows', extension: 'zip');
+        _getArtifactPath(platform: 'windows', extension: 'zip');
     final ProcessResult result = await Process.run(
       'powershell',
       [
@@ -212,7 +212,7 @@ class FlutterRelease {
   Future<String> _buildWeb() async {
     await _build(buildCmd: 'web');
 
-    final artifactPath = _getArtifactPath(platform: 'Web', extension: 'tar.gz');
+    final artifactPath = _getArtifactPath(platform: 'web', extension: 'tar.gz');
     final ProcessResult result = await Process.run(
       'tar',
       [
