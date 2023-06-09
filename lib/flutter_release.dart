@@ -145,7 +145,7 @@ class FlutterRelease {
         'activate',
         'https://github.com/gustl22/flutter_to_debian.git',
         '--source=git',
-        '--git-ref=9044122f1082817adb30523324c8f2e46408d34f', // `dev` branch
+        '--git-ref=v2',
       ],
       runInShell: true,
     );

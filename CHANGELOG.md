@@ -1,3 +1,8 @@
+## 0.0.3 - 2023-06-09
+
+- Update flutter_to_debian package
+- Make Platform name lowercase in output package
+
 ## 0.0.2 - 2023-06-08
 
 - Add executable in pubspec.yaml
