@@ -43,6 +43,7 @@ class FlutterRelease {
     }
   }
 
+  /// Build the flutter binaries for the platform given in [buildCmd].
   Future<void> _build({required String buildCmd}) async {
     final ProcessResult result = await Process.run(
       'flutter',
@@ -65,6 +66,7 @@ class FlutterRelease {
     }
   }
 
+  /// Build the artifact for Android. It creates a .apk installer.
   Future<String> _buildAndroid() async {
     await _build(buildCmd: 'apk');
 
@@ -75,10 +77,12 @@ class FlutterRelease {
     return artifactPath;
   }
 
+  /// Build the artifact for iOS. Not supported as it requires signing.
   Future<String> _buildIOS() async {
     throw Exception('Releasing ipa is not supported!');
   }
 
+  /// Build the artifact for Linux. It creates a .tar.gz archive.
   Future<String> _buildLinux() async {
     if (installDeps) {
       ProcessResult result = await Process.run(
@@ -133,6 +137,7 @@ class FlutterRelease {
     }
   }
 
+  /// Build the artifact for Debian. It creates a .deb installer.
   Future<String> _buildDebian() async {
     await _buildLinux();
 
@@ -177,6 +182,7 @@ class FlutterRelease {
     return artifactPath;
   }
 
+  /// Build the artifact for macOS. It creates a .zip archive.
   Future<String> _buildMacOs() async {
     await _build(buildCmd: 'macos');
 
@@ -200,6 +206,7 @@ class FlutterRelease {
     }
   }
 
+  /// Build the artifact for Windows. It creates a .zip archive.
   Future<String> _buildWindows() async {
     await _build(buildCmd: 'windows');
 
@@ -223,6 +230,7 @@ class FlutterRelease {
     }
   }
 
+  /// Build the artifact for Web. It creates a .tar.gz archive.
   Future<String> _buildWeb() async {
     await _build(buildCmd: 'web');
 
@@ -245,26 +253,33 @@ class FlutterRelease {
     }
   }
 
+  /// Get the output path, where the artifact should be placed.
   String _getArtifactPath(
       {required String platform, required String extension}) {
     return '$releaseFolder/$appName-$platform-$appVersion.$extension';
   }
 }
 
-/// Release type:
-/// [apk] -> Android
-/// [web] -> Web
-/// [ipa] -> iOS
-/// [macos] -> macOS
-/// [windows] -> Windows
-/// [linux] -> Linux
-/// [debian] -> Linux
+/// Enumerates the types of release.
 enum ReleaseType {
+  /// Release for Android.
   apk,
+
+  /// Release for Web.
   web,
+
+  /// Release for iOS.
   ipa,
+
+  /// Binary for macOS.
   macos,
+
+  /// Binary for Windows.
   windows,
+
+  /// Binary for Linux.
   linux,
+
+  /// Binary for Linux.
   debian,
 }

@@ -1,3 +1,8 @@
+## 0.0.4 - 2023-07-06
+
+- Compress macOS app folder
+- Add docs
+
 ## 0.0.3 - 2023-06-09
 
 - Update flutter_to_debian package
