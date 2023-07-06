@@ -180,10 +180,24 @@ class FlutterRelease {
   Future<String> _buildMacOs() async {
     await _build(buildCmd: 'macos');
 
-    final artifactPath = _getArtifactPath(platform: 'macos', extension: 'app');
-    final file = File('build/macos/Build/Products/Release/$appName.app');
-    file.rename(artifactPath);
-    return artifactPath;
+    final artifactPath = _getArtifactPath(platform: 'macos', extension: 'zip');
+    final ProcessResult result = await Process.run(
+      'ditto',
+      [
+        '-c',
+        '-k',
+        '--sequesterRsrc',
+        '--keepParent',
+        'build/macos/Build/Products/Release/$appName.app',
+        artifactPath,
+      ],
+    );
+
+    if (result.exitCode == 0) {
+      return artifactPath;
+    } else {
+      throw Exception(result.stderr.toString());
+    }
   }
 
   Future<String> _buildWindows() async {
