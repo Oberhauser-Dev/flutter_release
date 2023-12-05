@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter_to_debian/flutter_to_debian.dart';
+
 /// Class which holds the necessary attributes to perform a release on various
 /// platforms for the specified [releaseType].
 class FlutterRelease {
@@ -148,43 +150,11 @@ class FlutterRelease {
   Future<String> _buildDebian() async {
     await _buildLinux();
 
-    // Activate flutter_to_debian
-    ProcessResult result = await Process.run(
-      'dart',
-      [
-        'pub',
-        'global',
-        'activate',
-        'https://github.com/gustl22/flutter_to_debian.git',
-        '--source=git',
-        '--git-ref=v2',
-      ],
-      runInShell: true,
-    );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
-
-    result = await Process.run(
-      'dart',
-      [
-        'pub',
-        'global',
-        'run',
-        'flutter_to_debian',
-        'build',
-        '--build-version',
-        buildVersion,
-      ],
-      runInShell: true,
-    );
-
-    final debianAppName = appName.replaceAll('_', '-');
+    final pathToFile =
+        await FlutterToDebian.runBuild(version: buildVersion, arch: arch);
 
     final artifactPath = _getArtifactPath(platform: 'linux', extension: 'deb');
-    final file = File(
-        'build/linux/$arch/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
+    final file = File(pathToFile);
     file.rename(artifactPath);
     return artifactPath;
   }
