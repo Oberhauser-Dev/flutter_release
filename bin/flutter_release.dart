@@ -8,6 +8,7 @@ const appVersion = 'app-version';
 const buildNumber = 'build-number';
 const buildArg = 'build-arg';
 const releaseType = 'release-type';
+const architecture = 'arch'; //x64, arm64
 
 void main(List<String> arguments) async {
   exitCode = 0;
@@ -28,6 +29,7 @@ void main(List<String> arguments) async {
     buildArgs: argResults[buildArg] as List<String>,
     releaseType: ReleaseType.values
         .byName((argResults[releaseType] as String).toLowerCase()),
+    arch: argResults[architecture] as String
   );
 
   stdout.writeln(await release.release());

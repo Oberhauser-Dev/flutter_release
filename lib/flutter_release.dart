@@ -11,6 +11,7 @@ class FlutterRelease {
   List<String> buildArgs;
   String releaseFolder = 'build/releases';
   bool installDeps = true;
+  String arch;
 
   FlutterRelease({
     required this.appName,
@@ -20,7 +21,13 @@ class FlutterRelease {
     this.buildNumber = 0,
     this.buildArgs = const [],
     this.installDeps = true,
-  }) : buildVersion = buildVersion ?? appVersion.replaceFirst('v', '');
+    String? arch,
+  })  : buildVersion = buildVersion ?? appVersion.replaceFirst('v', ''),
+        arch = arch ??
+            ((releaseType == ReleaseType.windows ||
+                    releaseType == ReleaseType.linux)
+                ? 'x64'
+                : '');
 
   /// Release the app for the given platform release type.
   Future<String> release() async {
@@ -125,7 +132,7 @@ class FlutterRelease {
         '-czf',
         artifactPath,
         '-C',
-        'build/linux/x64/release/bundle',
+        'build/linux/$arch/release/bundle',
         '.', // Cannot use asterisk with `-C` option, as it's evaluated by shell
       ],
     );
@@ -177,7 +184,7 @@ class FlutterRelease {
 
     final artifactPath = _getArtifactPath(platform: 'linux', extension: 'deb');
     final file = File(
-        'build/linux/x64/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
+        'build/linux/$arch/release/debian/${debianAppName}_${buildVersion}_amd64.deb');
     file.rename(artifactPath);
     return artifactPath;
   }
@@ -218,7 +225,7 @@ class FlutterRelease {
         'Compress-Archive',
         '-Force',
         '-Path',
-        'build\\windows\\runner\\Release\\*',
+        'build\\windows\\$arch\\runner\\Release\\*',
         '-DestinationPath',
         artifactPath.replaceAll('/', '\\'),
       ],

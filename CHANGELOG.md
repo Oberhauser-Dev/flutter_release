@@ -1,3 +1,7 @@
+## 0.0.5 - 2023-12-05
+
+- Add `arch` param to support architectures for linux and windows
+
 ## 0.0.4 - 2023-07-06
 
 - Compress macOS app folder
