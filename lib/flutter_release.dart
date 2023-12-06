@@ -163,6 +163,11 @@ class FlutterRelease {
   Future<String> _buildMacOs() async {
     await _build(buildCmd: 'macos');
 
+    // The App's build file/folder name (*.app) is not equal to [appName], so must read the actual file name.
+    // Must be read out after build!
+    final appNameFile = File('./macos/Flutter/ephemeral/.app_filename');
+    final dotAppName =  (await appNameFile.readAsString()).trim();
+
     final artifactPath = _getArtifactPath(platform: 'macos', extension: 'zip');
     final ProcessResult result = await Process.run(
       'ditto',
@@ -171,7 +176,7 @@ class FlutterRelease {
         '-k',
         '--sequesterRsrc',
         '--keepParent',
-        'build/macos/Build/Products/Release/$appName.app',
+        'build/macos/Build/Products/Release/$dotAppName',
         artifactPath,
       ],
     );
