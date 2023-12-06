@@ -85,9 +85,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: a48830b
-      resolved-ref: a48830b563b0154ce644ccebb50fa5f2f39a7506
-      url: "https://github.com/jeffrey0606/flutter_to_debian.git"
+      ref: c034ed2
+      resolved-ref: c034ed2205dc5ec58a886f05a737c8fe1687d1e3
+      url: "https://github.com/gustl22/flutter_to_debian.git"
     source: git
     version: "2.0.0"
   frontend_server_client:
