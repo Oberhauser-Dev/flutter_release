@@ -13,7 +13,7 @@ class FlutterRelease {
   List<String> buildArgs;
   String releaseFolder = 'build/releases';
   bool installDeps = true;
-  String arch;
+  String? arch;
 
   FlutterRelease({
     required this.appName,
@@ -27,9 +27,11 @@ class FlutterRelease {
   })  : buildVersion = buildVersion ?? appVersion.replaceFirst('v', ''),
         arch = arch ??
             ((releaseType == ReleaseType.windows ||
-                    releaseType == ReleaseType.linux)
+                    releaseType == ReleaseType.linux ||
+                    releaseType == ReleaseType.debian ||
+                    releaseType == ReleaseType.macos)
                 ? 'x64'
-                : '');
+                : null);
 
   /// Release the app for the given platform release type.
   Future<String> release() async {

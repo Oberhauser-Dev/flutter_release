@@ -17,7 +17,8 @@ void main(List<String> arguments) async {
     ..addOption(appVersion, abbr: 'v')
     ..addOption(buildNumber, abbr: 'b')
     ..addOption(releaseType, abbr: 't')
-    ..addMultiOption(buildArg, abbr: 'o');
+    ..addMultiOption(buildArg, abbr: 'o')
+    ..addOption(architecture);
 
   ArgResults argResults = parser.parse(arguments);
   // final paths = argResults.rest;
@@ -29,7 +30,7 @@ void main(List<String> arguments) async {
     buildArgs: argResults[buildArg] as List<String>,
     releaseType: ReleaseType.values
         .byName((argResults[releaseType] as String).toLowerCase()),
-    arch: argResults[architecture] as String
+    arch: argResults[architecture] as String?
   );
 
   stdout.writeln(await release.release());
