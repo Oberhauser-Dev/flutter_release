@@ -11,11 +11,7 @@ executables:
 
 dependencies:
   args: ^2.4.2
-  flutter_to_debian: # ^2.0.0
-    git:
-      #url: 'https://github.com/jeffrey0606/flutter_to_debian.git'
-      url: 'https://github.com/gustl22/flutter_to_debian.git'
-      ref: c034ed2
+  flutter_to_debian: ^2.0.2
 
 dev_dependencies:
   lints: ^3.0.0
