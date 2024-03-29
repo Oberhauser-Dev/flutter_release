@@ -1,3 +1,7 @@
+## 0.0.7 - 2024-03-29
+
+- Make build arguments work
+
 ## 0.0.6 - 2024-03-29
 
 - Option to Publish to Google Play Store
