@@ -1,13 +1,14 @@
 # flutter_release
 
-A tool for building, releasing, publishing and deploying Flutter apps.
+A tool for building and publishing Flutter apps, e.g. on GitHub and Google Play Store.
+See also the according [GitHub action](https://github.com/marketplace/actions/flutter-release-action).
 
 ## Example
 
 Build:
 
 ```shell
-dart pub global run flutter_release \
+flutter_release build \
  --app-name example \
  --app-version v0.0.4 \
  --build-type apk \
@@ -31,7 +32,7 @@ flutter_release publish android-google-play \
  --key-alias=<mykeyalias>
 ```
 
-If the command is not found try: `dart pub global run flutter_release ...`.
+If the command is not found (in the PATH), try: `dart pub global run flutter_release ...`.
 
 Note that you have to pass the base64 arguments without any newline characters:
 ```shell

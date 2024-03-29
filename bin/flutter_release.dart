@@ -41,7 +41,7 @@ void main(List<String> arguments) async {
 
 void addBuildArgs(ArgParser parser) {
   parser
-    ..addOption(argAppName, abbr: 'n')
+    ..addOption(argAppName, abbr: 'n', mandatory: true)
     ..addOption(argAppVersion, abbr: 'v')
     ..addOption(argBuildNumber, abbr: 'b')
     ..addOption(argBuildVersion)
@@ -63,7 +63,7 @@ class BuildCommand extends Command {
   BuildCommand() {
     addBuildArgs(argParser);
     argParser
-      ..addOption(argBuildType, abbr: 't')
+      ..addOption(argBuildType, abbr: 't', mandatory: true)
       ..addOption(argReleaseFolder);
   }
 
@@ -74,7 +74,7 @@ class BuildCommand extends Command {
     final buildManager = BuildManager(
       appName: results[argAppName] as String,
       appVersion: results[argAppVersion] as String?,
-      buildNumber: int.tryParse(results[argBuildNumber]),
+      buildNumber: int.tryParse(results[argBuildNumber] ?? ''),
       buildVersion: results[argBuildVersion] as String?,
       buildArgs: results[argBuildArg] as List<String>,
       buildType: BuildType.values
