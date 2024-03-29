@@ -1,3 +1,7 @@
+## 0.0.6 - 2024-03-29
+
+- Option to Publish to Google Play Store
+
 ## 0.0.5 - 2023-12-05
 
 - Add `arch` param to support architectures for linux and windows
