@@ -1,3 +1,8 @@
+## 0.1.0 - 2024-03-30
+
+- Restructure packacke
+- Enable signing during build
+
 ## 0.0.7 - 2024-03-29
 
 - Make build arguments work
