@@ -3,45 +3,22 @@ import 'dart:io';
 
 import 'package:flutter_release/flutter_release.dart';
 
-class PublishManager {
-  final String appName;
-  final PublishDistributor publishDistributor;
-  final String appVersion;
-  final String? buildVersion;
-  final int? buildNumber;
-  final List<String> buildArgs;
-  final bool installDeps;
-  final String? arch;
-  final PublishDistributor distributor;
+class CommonPublish extends CommonBuild {
+  final bool isDryRun;
+  final PublishStage? stage;
 
-  PublishManager({
-    required this.appName,
-    required this.publishDistributor,
-    String? appVersion,
-    this.buildVersion,
-    this.buildNumber,
-    this.buildArgs = const [],
-    this.installDeps = true,
-    required this.arch,
-    required this.distributor,
-  }) : appVersion = appVersion ?? 'v0.0.1';
-
-  Future<void> publish() async {
+  CommonPublish({
+    required super.appName,
+    super.appVersion,
+    super.buildVersion,
+    super.buildNumber,
+    super.buildArgs,
+    super.installDeps,
+    this.stage,
+    bool? isDryRun,
+  }) : isDryRun = isDryRun ?? false {
     // Must be a release for publishing
     buildArgs.add('--release');
-
-    build({int? buildNumber}) => BuildManager(
-          appName: appName,
-          buildType: publishDistributor.buildType,
-          appVersion: appVersion,
-          arch: arch,
-          buildArgs: buildArgs,
-          buildNumber: this.buildNumber ?? buildNumber,
-          buildVersion: buildVersion,
-          installDeps: installDeps,
-        ).build();
-
-    await publishDistributor.publish(build);
   }
 }
 
@@ -70,15 +47,19 @@ enum PublishDistributorType {
 }
 
 abstract class PublishDistributor {
-  PublishDistributorType get distributorType;
+  final PublishDistributorType distributorType;
 
-  PublishStage? get stage;
+  final PlatformBuild platformBuild;
 
-  bool get isDryRun;
+  final CommonPublish commonPublish;
 
-  BuildType get buildType;
+  PublishDistributor({
+    required this.distributorType,
+    required this.platformBuild,
+    required this.commonPublish,
+  });
 
-  Future<void> publish(Future<String> Function({int? buildNumber}) build);
+  Future<void> publish();
 }
 
 enum PublishStage {
@@ -89,43 +70,20 @@ enum PublishStage {
 }
 
 class AndroidGooglePlayDistributor extends PublishDistributor {
-  @override
-  final PublishDistributorType distributorType =
-      PublishDistributorType.androidGooglePlay;
-  @override
-  final BuildType buildType = BuildType.aab;
-
-  @override
-  final PublishStage? stage;
-
-  @override
-  final bool isDryRun;
-
   static final _androidDirectory = 'android';
   static final _fastlaneDirectory = '$_androidDirectory/fastlane';
-  static final _keyStoreFile = 'keystore.jks';
   static final _fastlaneSecretsJsonFile = 'fastlane-secrets.json';
 
   final String fastlaneSecretsJsonBase64;
-  final String keyStoreFileBase64;
-  final String keyStorePassword;
-  final String keyAlias;
-  final String keyPassword;
 
   AndroidGooglePlayDistributor({
-    this.stage,
+    required super.commonPublish,
+    required super.platformBuild,
     required this.fastlaneSecretsJsonBase64,
-    required this.keyStoreFileBase64,
-    required this.keyStorePassword,
-    required this.keyAlias,
-    String? keyPassword,
-    bool? isDryRun,
-  })  : keyPassword = keyPassword ?? keyStorePassword,
-        isDryRun = isDryRun ?? false;
+  }) : super(distributorType: PublishDistributorType.androidGooglePlay);
 
   @override
-  Future<void> publish(
-      Future<String> Function({int? buildNumber}) build) async {
+  Future<void> publish() async {
     print('Install dependencies...');
     ProcessResult result = await Process.run(
       'sudo',
@@ -157,31 +115,8 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
       throw Exception(result.stderr.toString());
     }
 
-    // Check if key signing is prepared
     final buildGradleFile = File('$_androidDirectory/app/build.gradle');
     final buildGradleFileContents = await buildGradleFile.readAsString();
-    if (!(buildGradleFileContents.contains('key.properties') &&
-        buildGradleFileContents.contains('keyAlias') &&
-        buildGradleFileContents.contains('keyPassword') &&
-        buildGradleFileContents.contains('storeFile') &&
-        buildGradleFileContents.contains('storePassword'))) {
-      throw Exception(
-        'Signing is not configured for Android, please follow the instructions:\n'
-        'https://docs.flutter.dev/deployment/android#configure-signing-in-gradle',
-      );
-    }
-
-    // Save keystore file
-    final keyStoreFile = File('$_androidDirectory/$_keyStoreFile');
-    await keyStoreFile.writeAsBytes(base64.decode(keyStoreFileBase64));
-
-    final signingKeys = '''
-storePassword=$keyStorePassword
-keyPassword=$keyPassword
-keyAlias=$keyAlias
-storeFile=${keyStoreFile.absolute.path}
-    ''';
-    await File('$_androidDirectory/key.properties').writeAsString(signingKeys);
 
     // Save Google play store credentials file
     final fastlaneSecretsJsonFile =
@@ -219,7 +154,7 @@ package_name("$packageName")
       throw Exception(result.stderr.toString());
     }
 
-    final track = switch (stage) {
+    final track = switch (commonPublish.stage) {
       PublishStage.production => 'production',
       PublishStage.beta => 'beta',
       PublishStage.alpha => 'alpha',
@@ -305,10 +240,13 @@ package_name("$packageName")
     // }
 
     print('Build application...');
-    final outputPath = await build(buildNumber: versionCode);
+    if (versionCode != null) {
+      platformBuild.commonBuild.buildNumber = versionCode;
+    }
+    final outputPath = await platformBuild.build();
     final outputFile = File(outputPath);
 
-    if (isDryRun) {
+    if (commonPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');
@@ -319,7 +257,7 @@ package_name("$packageName")
         '--track',
         track,
         '--release_status',
-        switch (stage) {
+        switch (commonPublish.stage) {
           PublishStage.production => 'completed',
           PublishStage.beta => 'completed',
           PublishStage.alpha => 'completed',

@@ -8,10 +8,9 @@ See also the according [GitHub action](https://github.com/marketplace/actions/fl
 Build:
 
 ```shell
-flutter_release build \
+flutter_release build apk \
  --app-name example \
- --app-version v0.0.4 \
- --build-type apk \
+ --app-version v0.0.1-alpha.1 \
  --build-arg=--dart-define=API_URL=https://example.com \
  --build-arg=--dart-define=API_KEY=12345678
 ```
@@ -23,7 +22,7 @@ flutter_release publish android-google-play \
  --dry-run \
  --stage internal \
  --app-name wrestling_scoreboard_client \
- --app-version v0.0.1-beta.10 \
+ --app-version v0.0.1-alpha.1 \
  --build-arg=--dart-define=API_URL=https://example.com \
  --build-arg=--dart-define=API_KEY=12345678 \
  --fastlane-secrets-json-base64=$(base64 --wrap=0 android/fastlane-secrets.json) \
@@ -35,11 +34,13 @@ flutter_release publish android-google-play \
 If the command is not found (in the PATH), try: `dart pub global run flutter_release ...`.
 
 Note that you have to pass the base64 arguments without any newline characters:
+
 ```shell
 MY_BASE_64=$(base64 --wrap=0 /myfile)
 ```
 
 Or remove them afterward:
+
 ```shell
 MY_BASE_64="${MY_BASE_64//$'\n'/}"
 ```
@@ -79,9 +80,11 @@ Support for other app distributors is planned.
 3. Configure [signing in gradle](https://docs.flutter.dev/deployment/android#configure-signing-in-gradle).
    This is needed to be able to execute the build via Flutter and not via Gradle.
    Convert the keystore to a base64 string e.g. `base64 --wrap=0 android/keystore.jks`
-4. Follow the guide of fastlane for [setting up supply](https://docs.fastlane.tools/getting-started/android/setup/#setting-up-supply).
+4. Follow the guide of fastlane
+   for [setting up supply](https://docs.fastlane.tools/getting-started/android/setup/#setting-up-supply).
 5. Convert the Google Play Store credentials json to base64 e.g. `base64 --wrap=0 android/fastlane-secrets.json`
-6. Manually build a signed app bundle and publish it on the Google Play Store at least once to be able to automate the process, e.g.:
+6. Manually build a signed app bundle and publish it on the Google Play Store at least once to be able to automate the
+   process, e.g.:
    ```
    flutter build appbundle \
    --release \
