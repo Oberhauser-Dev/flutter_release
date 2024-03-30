@@ -88,6 +88,7 @@ enum BuildType {
   debian,
 }
 
+/// The platform where you want your app to be build for.
 abstract class PlatformBuild {
   final String? arch;
   final BuildType buildType;
@@ -101,6 +102,7 @@ abstract class PlatformBuild {
   Future<String> build();
 }
 
+/// Build the app for Android.
 class AndroidPlatformBuild extends PlatformBuild {
   static final _androidDirectory = 'android';
   static final _keyStoreFile = 'keystore.jks';
@@ -185,6 +187,7 @@ storeFile=${keyStoreFile.absolute.path}
   }
 }
 
+/// Build the app for Windows.
 class WindowsPlatformBuild extends PlatformBuild {
   WindowsPlatformBuild({
     required super.buildType,
@@ -218,6 +221,7 @@ class WindowsPlatformBuild extends PlatformBuild {
   }
 }
 
+/// Build the app for Linux.
 class LinuxPlatformBuild extends PlatformBuild {
   LinuxPlatformBuild({
     required super.buildType,
@@ -309,6 +313,7 @@ class LinuxPlatformBuild extends PlatformBuild {
   }
 }
 
+/// Build the app for MacOS.
 class MacOsPlatformBuild extends PlatformBuild {
   MacOsPlatformBuild({
     required super.buildType,
@@ -348,6 +353,7 @@ class MacOsPlatformBuild extends PlatformBuild {
   }
 }
 
+/// Build the app for iOS.
 class IosPlatformBuild extends PlatformBuild {
   IosPlatformBuild({
     required super.buildType,
@@ -362,6 +368,7 @@ class IosPlatformBuild extends PlatformBuild {
   }
 }
 
+/// Build the app for Web.
 class WebPlatformBuild extends PlatformBuild {
   WebPlatformBuild({
     required super.buildType,

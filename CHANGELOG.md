@@ -1,3 +1,8 @@
+## 0.1.1 - 2024-03-30
+
+- Create missing fastlane directory
+- Update documentation
+
 ## 0.1.0 - 2024-03-30
 
 - Restructure package

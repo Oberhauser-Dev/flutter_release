@@ -46,6 +46,7 @@ enum PublishDistributorType {
   linuxSnap,
 }
 
+/// A distributor, where you can publish your app, such as an app store.
 abstract class PublishDistributor {
   final PublishDistributorType distributorType;
 
@@ -62,13 +63,22 @@ abstract class PublishDistributor {
   Future<void> publish();
 }
 
+/// The [stage] of publishing.
 enum PublishStage {
+  /// Publish the app to the public.
   production,
+
+  /// Publish a ready stage of your app.
   beta,
+
+  /// Publish an early stage of your app.
   alpha,
+
+  /// Publish only visible to internal testers.
   internal,
 }
 
+/// Distribute your app on the Google Play store.
 class AndroidGooglePlayDistributor extends PublishDistributor {
   static final _androidDirectory = 'android';
   static final _fastlaneDirectory = '$_androidDirectory/fastlane';
