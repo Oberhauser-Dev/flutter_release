@@ -136,6 +136,7 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
 json_key_file("${fastlaneSecretsJsonFile.absolute.path}")
 package_name("$packageName")
     ''';
+    await Directory(_fastlaneDirectory).create(recursive: true);
     await File('$_fastlaneDirectory/Appfile').writeAsString(fastlaneAppfile);
 
     // Check if play store credentials are valid
