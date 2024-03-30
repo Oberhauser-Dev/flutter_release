@@ -1,6 +1,6 @@
 ## 0.1.0 - 2024-03-30
 
-- Restructure packacke
+- Restructure package
 - Enable signing during build
 
 ## 0.0.7 - 2024-03-29
