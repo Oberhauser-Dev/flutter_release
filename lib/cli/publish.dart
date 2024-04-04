@@ -16,6 +16,15 @@ const argDryRun = 'dry-run';
 const commandAndroidGooglePlay = 'android-google-play';
 const argFastlaneSecretsJsonBase64 = 'fastlane-secrets-json-base64';
 
+// Publish: Web Server
+const commandWebServer = 'web-server';
+const argWebServerHost = 'host';
+const argWebServerPort = 'port';
+const argWebServerPath = 'path';
+const argWebSshUser = 'ssh-user';
+const argWebSshPrivateKeyBase64 = 'ssh-private-key-base64';
+const argWebSshPrivateKeyPassphrase = 'ssh-private-key-passphrase';
+
 class PublishCommand extends Command {
   @override
   final name = commandPublish;
@@ -24,6 +33,7 @@ class PublishCommand extends Command {
 
   PublishCommand() {
     addSubcommand(PublishAndroidGooglePlayCommand());
+    addSubcommand(PublishWebServerCommand());
   }
 }
 
@@ -75,7 +85,7 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
 
   PublishAndroidGooglePlayCommand() {
     AndroidBuildCommand.addAndroidBuildArgs(argParser);
-    argParser.addOption(argFastlaneSecretsJsonBase64);
+    argParser.addOption(argFastlaneSecretsJsonBase64, mandatory: true);
   }
 
   @override
@@ -98,6 +108,45 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
       platformBuild: platformBuild,
       fastlaneSecretsJsonBase64:
           results[argFastlaneSecretsJsonBase64] as String,
+    );
+  }
+}
+
+class PublishWebServerCommand extends CommonPublishCommand {
+  @override
+  final name = commandWebServer;
+  @override
+  final description = 'Publish the app on a Web server.';
+
+  PublishWebServerCommand() {
+    argParser
+      ..addOption(argWebServerHost, mandatory: true)
+      ..addOption(argWebServerPort)
+      ..addOption(argWebServerPath, mandatory: true)
+      ..addOption(argWebSshUser, mandatory: true)
+      ..addOption(argWebSshPrivateKeyBase64, mandatory: true);
+    // ..addOption(argWebSshPrivateKeyPassphrase); Passphrase currently not supported
+  }
+
+  @override
+  PublishDistributor getPublishDistributor(
+    ArgResults results,
+    CommonPublish commonPublish,
+  ) {
+    final platformBuild = WebPlatformBuild(
+      buildType: BuildType.web,
+      commonBuild: commonPublish,
+    );
+
+    return WebServerDistributor(
+      commonPublish: commonPublish,
+      platformBuild: platformBuild,
+      host: results[argWebServerHost] as String,
+      port: int.tryParse(results[argWebServerPort] ?? ''),
+      webServerPath: results[argWebServerPath] as String,
+      sshUser: results[argWebSshUser] as String,
+      sshPrivateKeyBase64: results[argWebSshPrivateKeyBase64] as String,
+      // sshPrivateKeyPassphrase: results[argWebSshPrivateKeyPassphrase] as String?,
     );
   }
 }

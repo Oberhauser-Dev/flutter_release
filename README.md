@@ -93,3 +93,22 @@ Support for other app distributors is planned.
    --dart-define=API_KEY=12345678`
    ```
 
+### Web - Server (via Debian only)
+
+1. Generate a key pair on your client `ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519_flutter_release -C flutter_release` **without** a passphrase
+2. Add the output of `cat $HOME/.ssh/id_ed25519_flutter_release.pub` to your servers `$HOME/.ssh/authorized_keys`
+3. Convert the private key to a base64 string e.g. `base64 --wrap=0 $HOME/.ssh/id_ed25519_flutter_release`
+4. Run flutter_release 
+   ```shell
+   flutter_release publish web-server \
+    --dry-run \
+    --app-name wrestling_scoreboard_client \
+    --app-version v0.0.1-alpha.1 \
+    --build-arg=--dart-define=API_URL=https://example.com \
+    --build-arg=--dart-define=API_KEY=12345678 \
+    --host=host.example.com \
+    --port=22 \
+    --path=/var/www/html \
+    --ssh-user=<user> \
+    --ssh-private-key-base64=<private-key>
+   ```
