@@ -1,6 +1,6 @@
 name: flutter_release
 description: A tool for building and publishing Flutter apps, e.g. on GitHub and the Google Play Store.
-version: 0.1.1
+version: 0.1.2
 repository: https://github.com/Oberhauser-Dev/flutter_release
 
 environment:

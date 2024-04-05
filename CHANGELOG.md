@@ -1,3 +1,7 @@
+## 0.1.2 - 2024-04-05
+
+- Support Publishing to a web server
+
 ## 0.1.1 - 2024-03-30
 
 - Create missing fastlane directory
