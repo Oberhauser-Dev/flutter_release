@@ -19,8 +19,8 @@ const argFastlaneSecretsJsonBase64 = 'fastlane-secrets-json-base64';
 // Publish: Web Server
 const commandWebServer = 'web-server';
 const argWebServerHost = 'host';
-const argWebServerPort = 'port';
 const argWebServerPath = 'path';
+const argWebServerPort = 'ssh-port';
 const argWebSshUser = 'ssh-user';
 const argWebSshPrivateKeyBase64 = 'ssh-private-key-base64';
 const argWebSshPrivateKeyPassphrase = 'ssh-private-key-passphrase';

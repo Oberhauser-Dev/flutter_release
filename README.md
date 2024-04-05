@@ -107,8 +107,8 @@ Support for other app distributors is planned.
     --build-arg=--dart-define=API_URL=https://example.com \
     --build-arg=--dart-define=API_KEY=12345678 \
     --host=host.example.com \
-    --port=22 \
     --path=/var/www/html \
+    --ssh-port=22 \
     --ssh-user=<user> \
     --ssh-private-key-base64=<private-key>
    ```
