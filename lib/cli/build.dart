@@ -5,8 +5,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_release/flutter_release.dart';
 
-// Build
-const commandBuild = 'build';
+// Common
 const argAppName = 'app-name';
 const argAppVersion = 'app-version';
 const argBuildNumber = 'build-number';
@@ -14,6 +13,9 @@ const argBuildVersion = 'build-version';
 const argBuildArg = 'build-arg';
 const argReleaseFolder = 'release-folder';
 const argArchitecture = 'arch'; //x64, arm64
+
+// Build
+const commandBuild = 'build';
 
 // Build Android
 const argKeyStoreFileBase64 = 'keystore-file-base64';
