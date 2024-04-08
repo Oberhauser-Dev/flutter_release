@@ -16,6 +16,13 @@ const argDryRun = 'dry-run';
 const commandAndroidGooglePlay = 'android-google-play';
 const argFastlaneSecretsJsonBase64 = 'fastlane-secrets-json-base64';
 
+// Publish: iOS App Store
+const commandIosAppStore = 'ios-app-store';
+const argIosAppleUsername = 'apple-username';
+const argIosApplePassword = 'apple-password';
+const argIosContentProviderId = 'content-provider-id';
+const argIosTeamId = 'team-id';
+
 // Publish: Web Server
 const commandWebServer = 'web-server';
 const argWebServerHost = 'host';
@@ -33,6 +40,7 @@ class PublishCommand extends Command {
 
   PublishCommand() {
     addSubcommand(PublishAndroidGooglePlayCommand());
+    addSubcommand(PublishIosAppStoreCommand());
     addSubcommand(PublishWebServerCommand());
   }
 }
@@ -108,6 +116,47 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
       platformBuild: platformBuild,
       fastlaneSecretsJsonBase64:
           results[argFastlaneSecretsJsonBase64] as String,
+    );
+  }
+}
+
+class PublishIosAppStoreCommand extends CommonPublishCommand {
+  @override
+  final name = commandIosAppStore;
+  @override
+  final description = 'Publish the app on iOS App Store.';
+
+  PublishIosAppStoreCommand() {
+    argParser
+      ..addOption(argIosAppleUsername, mandatory: true, help: 'aka `apple_id`')
+      ..addOption(argIosApplePassword, mandatory: true)
+      ..addOption(
+        argIosContentProviderId,
+        mandatory: true,
+        help: 'aka `itc_team_id`, see: '
+            'https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/user/detail',
+      )
+      ..addOption(argIosTeamId, mandatory: true, help: 'aka `team_id`');
+  }
+
+  @override
+  PublishDistributor getPublishDistributor(
+    ArgResults results,
+    CommonPublish commonPublish,
+  ) {
+    final platformBuild = IosPlatformBuild(
+      buildType: BuildType.ipa,
+      commonBuild: commonPublish,
+      arch: results[argArchitecture] as String?,
+    );
+
+    return IosAppStoreDistributor(
+      commonPublish: commonPublish,
+      platformBuild: platformBuild,
+      appleUsername: results[argIosAppleUsername] as String,
+      applePassword: results[argIosApplePassword] as String,
+      contentProviderId: results[argIosContentProviderId] as String,
+      teamId: results[argIosTeamId] as String,
     );
   }
 }

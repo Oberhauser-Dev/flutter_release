@@ -8,7 +8,7 @@ import 'package:flutter_to_debian/flutter_to_debian.dart';
 class CommonBuild {
   final String appName;
   final String appVersion;
-  final String buildVersion;
+  String buildVersion;
   int buildNumber;
   List<String> buildArgs;
   final String releaseFolder;
@@ -44,14 +44,11 @@ class CommonBuild {
     final ProcessResult result = await Process.run(
       'flutter',
       arguments,
+      // Must run in shell to correctly resolve paths on Windows
       runInShell: true,
     );
 
-    if (result.exitCode == 0) {
-      return;
-    } else {
-      throw Exception(result.stderr.toString());
-    }
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
   }
 
   /// Get the output path, where the artifact should be placed.
@@ -73,6 +70,9 @@ enum BuildType {
   web,
 
   /// Build for iOS.
+  ios,
+
+  /// Build app store bundle for iOS.
   ipa,
 
   /// Build binary for macOS.
@@ -213,11 +213,9 @@ class WindowsPlatformBuild extends PlatformBuild {
         artifactPath.replaceAll('/', '\\'),
       ],
     );
-    if (result.exitCode == 0) {
-      return artifactPath;
-    } else {
-      throw Exception(result.stderr.toString());
-    }
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    return artifactPath;
   }
 }
 
@@ -251,9 +249,7 @@ class LinuxPlatformBuild extends PlatformBuild {
         ],
         runInShell: true,
       );
-      if (result.exitCode != 0) {
-        throw Exception(result.stderr.toString());
-      }
+      if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
       result = await Process.run(
         'sudo',
@@ -271,9 +267,7 @@ class LinuxPlatformBuild extends PlatformBuild {
         runInShell: true,
       );
 
-      if (result.exitCode != 0) {
-        throw Exception(result.stderr.toString());
-      }
+      if (result.exitCode != 0) throw Exception(result.stderr.toString());
     }
 
     await commonBuild.flutterBuild(buildCmd: 'linux');
@@ -291,11 +285,9 @@ class LinuxPlatformBuild extends PlatformBuild {
       ],
     );
 
-    if (result.exitCode == 0) {
-      return artifactPath;
-    } else {
-      throw Exception(result.stderr.toString());
-    }
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    return artifactPath;
   }
 
   /// Build the artifact for Debian. It creates a .deb installer.
@@ -345,11 +337,9 @@ class MacOsPlatformBuild extends PlatformBuild {
       ],
     );
 
-    if (result.exitCode == 0) {
-      return artifactPath;
-    } else {
-      throw Exception(result.stderr.toString());
-    }
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    return artifactPath;
   }
 }
 
@@ -361,10 +351,52 @@ class IosPlatformBuild extends PlatformBuild {
     super.arch,
   });
 
+  /// Build the artifact for iOS App Store. It creates a .ipa bundle.
+  Future<String> _buildIosApp() async {
+    // TODO: build signed app, independently from publish.
+    await commonBuild.flutterBuild(buildCmd: 'ios');
+
+    final artifactPath =
+        commonBuild.getArtifactPath(platform: 'ios', extension: 'zip');
+    final ProcessResult result = await Process.run(
+      'ditto',
+      [
+        '-c',
+        '-k',
+        '--sequesterRsrc',
+        '--keepParent',
+        'build/ios/iphoneos/Runner.app',
+        artifactPath,
+      ],
+    );
+
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    return artifactPath;
+  }
+
+  /// Build the artifact for iOS App Store. It creates a .ipa bundle.
+  Future<String> _buildIosIpa() async {
+    // Ipa build will fail resolving the provisioning profile, this is done later by fastlane.
+    await commonBuild.flutterBuild(buildCmd: 'ipa');
+
+    // Does not create ipa at this point
+    // final artifactPath =
+    //     commonBuild.getArtifactPath(platform: 'ios', extension: 'ipa');
+    // final file = File('build/app/outputs/flutter-apk/app-release.apk');
+    // await file.rename(artifactPath);
+    return '';
+  }
+
   /// Build the artifact for iOS. Not supported as it requires signing.
   @override
   Future<String> build() async {
-    throw Exception('Releasing ipa is not supported!');
+    return switch (buildType) {
+      BuildType.ios => _buildIosApp(),
+      BuildType.ipa => _buildIosIpa(),
+      _ => throw UnsupportedError(
+          'BuildType $buildType is not available for iOS!'),
+    };
   }
 }
 
@@ -394,10 +426,8 @@ class WebPlatformBuild extends PlatformBuild {
       ],
     );
 
-    if (result.exitCode == 0) {
-      return artifactPath;
-    } else {
-      throw Exception(result.stderr.toString());
-    }
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    return artifactPath;
   }
 }

@@ -30,14 +30,15 @@ class BuildCommand extends Command {
   final description = 'Build the app in the specified format.';
 
   BuildCommand() {
-    addSubcommand(ApkAndroidBuildCommand());
-    addSubcommand(AppbundleAndroidBuildCommand());
+    addSubcommand(AndroidApkBuildCommand());
+    addSubcommand(AndroidAppbundleBuildCommand());
+    addSubcommand(IosIpaBuildCommand());
+    addSubcommand(IosAppBuildCommand());
     addSubcommand(WindowsBuildCommand());
     addSubcommand(LinuxBuildCommand());
     addSubcommand(DebianBuildCommand());
     addSubcommand(WebBuildCommand());
     addSubcommand(MacOsBuildCommand());
-    addSubcommand(IosBuildCommand());
   }
 }
 
@@ -108,7 +109,7 @@ abstract class AndroidBuildCommand extends CommonBuildCommand {
   }
 }
 
-class ApkAndroidBuildCommand extends AndroidBuildCommand {
+class AndroidApkBuildCommand extends AndroidBuildCommand {
   @override
   final description = 'Build the app as Android apk.';
 
@@ -116,7 +117,7 @@ class ApkAndroidBuildCommand extends AndroidBuildCommand {
   BuildType buildType = BuildType.apk;
 }
 
-class AppbundleAndroidBuildCommand extends AndroidBuildCommand {
+class AndroidAppbundleBuildCommand extends AndroidBuildCommand {
   @override
   final description = 'Build the app as Android app bundle.';
 
@@ -200,13 +201,7 @@ class MacOsBuildCommand extends CommonBuildCommand {
   }
 }
 
-class IosBuildCommand extends CommonBuildCommand {
-  @override
-  final description = 'Build the app as iOS .ipa.';
-
-  @override
-  BuildType buildType = BuildType.ipa;
-
+abstract class IosBuildCommand extends CommonBuildCommand {
   @override
   PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
     return IosPlatformBuild(
@@ -215,4 +210,20 @@ class IosBuildCommand extends CommonBuildCommand {
       arch: results[argArchitecture] as String?,
     );
   }
+}
+
+class IosIpaBuildCommand extends IosBuildCommand {
+  @override
+  final description = 'Build the app as iOS .ipa.';
+
+  @override
+  BuildType buildType = BuildType.ipa;
+}
+
+class IosAppBuildCommand extends IosBuildCommand {
+  @override
+  final description = 'Build the app as iOS .app.';
+
+  @override
+  BuildType buildType = BuildType.ios;
 }

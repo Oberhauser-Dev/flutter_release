@@ -290,6 +290,166 @@ package_name("$packageName")
   }
 }
 
+/// Distribute your app on the iOS App store.
+class IosAppStoreDistributor extends PublishDistributor {
+  static final _iosDirectory = 'ios';
+  static final _fastlaneDirectory = '$_iosDirectory/fastlane';
+
+  final String appleUsername;
+  final String applePassword;
+  final String contentProviderId;
+  final String teamId;
+
+  IosAppStoreDistributor({
+    required super.commonPublish,
+    required super.platformBuild,
+    required this.appleUsername,
+    required this.applePassword,
+    required this.contentProviderId,
+    required this.teamId,
+  }) : super(distributorType: PublishDistributorType.iosAppStore);
+
+  @override
+  Future<void> publish() async {
+    print('Install dependencies...');
+
+    final isProduction = commonPublish.stage == PublishStage.production;
+
+    ProcessResult result = await Process.run(
+      'brew',
+      ['install', 'fastlane'],
+    );
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    // Determine app bundle id
+    final iosAppInfoFile =
+        File('$_iosDirectory/Runner.xcodeproj/project.pbxproj');
+    final iosAppInfoFileContents = await iosAppInfoFile.readAsString();
+    final regex = RegExp(r'(?<=PRODUCT_BUNDLE_IDENTIFIER)(.*)(?=;\n)');
+    final match = regex.firstMatch(iosAppInfoFileContents);
+    if (match == null) throw Exception('Bundle Id not found');
+    var bundleId = match.group(0);
+    if (bundleId == null) throw Exception('Bundle Id not found');
+    bundleId =
+        bundleId.replaceFirst('=', '').replaceAll('.RunnerTests', '').trim();
+    print('Use app bundle id: $bundleId');
+
+    final fastlaneAppfile = '''
+app_identifier("$bundleId")
+apple_id("$appleUsername")
+itc_team_id("$contentProviderId")
+team_id("$teamId")
+    ''';
+    await Directory(_fastlaneDirectory).create(recursive: true);
+    await File('$_fastlaneDirectory/Appfile').writeAsString(fastlaneAppfile);
+
+    final envFastlane = {
+      'FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD': applePassword,
+    };
+
+    // Download certificate
+    result = await Process.run(
+      'fastlane',
+      ['run', 'get_certificates'],
+      workingDirectory: _iosDirectory,
+      environment: envFastlane,
+    );
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    // Download provisioning profile
+    result = await Process.run(
+      'fastlane',
+      ['run', 'get_provisioning_profile', 'filename:AppStore.mobileprovision'],
+      workingDirectory: _iosDirectory,
+      environment: envFastlane,
+    );
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    // Update provisioning profile
+    result = await Process.run(
+      'fastlane',
+      [
+        'run',
+        'update_project_provisioning',
+        'xcodeproj:./Runner.xcodeproj',
+        'profile:./AppStore.mobileprovision',
+      ],
+      workingDirectory: _iosDirectory,
+      environment: envFastlane,
+    );
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    print('Build application...');
+
+    if (!isProduction) {
+      final buildVersion = platformBuild.commonBuild.buildVersion;
+      // Remove semver suffix
+      // See: https://github.com/flutter/flutter/issues/27589
+      if (buildVersion.contains('+')) {
+        platformBuild.commonBuild.buildVersion = buildVersion.split('+')[0];
+        print(
+          'Build version was truncated from $buildVersion to '
+          '${platformBuild.commonBuild.buildVersion} as required by app store',
+        );
+      }
+      if (buildVersion.contains('-')) {
+        platformBuild.commonBuild.buildVersion = buildVersion.split('-')[0];
+        print(
+          'Build version was truncated from $buildVersion to '
+          '${platformBuild.commonBuild.buildVersion} as required by app store',
+        );
+      }
+    }
+
+    // Build xcarchive only
+    await platformBuild.build();
+
+    // Build signed ipa
+    // https://docs.flutter.dev/deployment/cd
+    result = await Process.run(
+      'fastlane',
+      [
+        'run',
+        'build_app',
+        'skip_build_archive:true',
+        'archive_path:../build/ios/archive/Runner.xcarchive',
+      ],
+      workingDirectory: _iosDirectory,
+      environment: envFastlane,
+    );
+    if (result.exitCode != 0) throw Exception(result.stderr.toString());
+
+    if (commonPublish.isDryRun) {
+      print('Did NOT publish: Remove `--dry-run` flag for publishing.');
+    } else {
+      print('Publish...');
+      if (!isProduction) {
+        final arguments = ['pilot', 'upload'];
+        print('fastlane ${arguments.join(' ')}');
+        result = await Process.run(
+          'fastlane',
+          arguments,
+          workingDirectory: _iosDirectory,
+          environment: envFastlane,
+        );
+
+        if (result.exitCode != 0) throw Exception(result.stderr.toString());
+      } else {
+        final arguments = ['upload_to_app_store'];
+        print('fastlane ${arguments.join(' ')}');
+        result = await Process.run(
+          'fastlane',
+          arguments,
+          workingDirectory: _iosDirectory,
+          environment: envFastlane,
+        );
+
+        if (result.exitCode != 0) throw Exception(result.stderr.toString());
+      }
+    }
+  }
+}
+
 /// Distribute your app on a web server.
 class WebServerDistributor extends PublishDistributor {
   final String webServerPath;

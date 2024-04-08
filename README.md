@@ -58,7 +58,7 @@ MY_BASE_64="${MY_BASE_64//$'\n'/}"
 | Platform    | Android |               | iOS             | web          | Windows           | macOS           | Linux  |          |
 |-------------|---------|---------------|-----------------|--------------|-------------------|-----------------|--------|----------|
 | **Build**   | apk     | aab           | ipa             | web          | windows           | macos           | linux  | debian   |
-| **Publish** |         | Google Play ✓ | iOS App Store ❌ | Web Server ❌ | Microsoft Store ❌ | Mac App Store ❌ | Snap ❌ | Ubuntu ❌ |
+| **Publish** |         | Google Play ✓ | iOS App Store ✓ | Web Server ✓ | Microsoft Store ❌ | Mac App Store ❌ | Snap ❌ | Ubuntu ❌ |
 
 Support for other app distributors is planned.
 
@@ -91,6 +91,33 @@ Support for other app distributors is planned.
    --build-name=0.0.1-beta.10 \
    --dart-define=API_URL=https://example.com \
    --dart-define=API_KEY=12345678`
+   ```
+
+### iOS - App Store
+
+1. `brew install fastlane`
+2. Make sure you have these files ignored in your `./ios/.gitignore`:
+   ```
+   *.cer
+   *.certSigningRequest
+   *.mobileprovision
+   *.p12
+   ```
+3. Create an [app specific password](https://appleid.apple.com/account/manage).
+4. Execute `cd ios && fastlane release`. Follow the steps.
+5. Extract the informations from the `ios/fastlane/Appfile` file.
+6. Run flutter_release
+   ```shell
+   flutter_release publish ios-app-store \
+    --dry-run \
+    --app-name wrestling_scoreboard_client \
+    --app-version v0.0.1-alpha.1 \
+    --build-arg=--dart-define=API_URL=https://example.com \
+    --build-arg=--dart-define=API_KEY=12345678 \
+    --apple-username=<apple_id> \
+    --apple-password=<app-specific-password> \
+    --content-provider-id=<itc_team_id> \
+    --team-id=<team_id>
    ```
 
 ### Web - Server (via Debian only)
