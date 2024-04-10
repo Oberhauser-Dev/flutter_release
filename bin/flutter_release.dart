@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_release/cli/build.dart';
+import 'package:flutter_release/cli/prepare.dart';
 import 'package:flutter_release/cli/publish.dart';
 
 void main(List<String> arguments) async {
@@ -11,5 +12,6 @@ void main(List<String> arguments) async {
 
   commandRunner.addCommand(BuildCommand());
   commandRunner.addCommand(PublishCommand());
+  commandRunner.addCommand(PrepareCommand());
   await commandRunner.run(arguments);
 }

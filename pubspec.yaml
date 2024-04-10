@@ -11,6 +11,7 @@ executables:
 
 dependencies:
   args: ^2.4.2
+  collection: ^1.18.0
   flutter_to_debian: ^2.0.2
 
 dev_dependencies:

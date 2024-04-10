@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_release/flutter_release.dart';
+import 'package:flutter_release/platform/ios.dart';
 import 'package:flutter_release/utils/process.dart';
 
 class CommonPublish extends CommonBuild {
@@ -235,18 +236,32 @@ class IosAppStoreDistributor extends PublishDistributor {
   static final _fastlaneDirectory = '$_iosDirectory/fastlane';
 
   final String appleUsername;
-  final String applePassword;
+  final String apiKeyId;
+  final String apiIssuerId;
+  final String apiPrivateKeyBase64;
   final String contentProviderId;
   final String teamId;
+  final bool isTeamEnterprise;
+  final String distributionPrivateKeyBase64;
+
+  /// This may can be removed once getting certificates is implemented in fastlane
+  /// https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
+  final String distributionCertificateBase64;
 
   IosAppStoreDistributor({
     required super.commonPublish,
     required super.platformBuild,
     required this.appleUsername,
-    required this.applePassword,
+    required this.apiKeyId,
+    required this.apiIssuerId,
+    required this.apiPrivateKeyBase64,
     required this.contentProviderId,
     required this.teamId,
-  }) : super(distributorType: PublishDistributorType.iosAppStore);
+    bool? isTeamEnterprise,
+    required this.distributionPrivateKeyBase64,
+    required this.distributionCertificateBase64,
+  })  : isTeamEnterprise = isTeamEnterprise ?? false,
+        super(distributorType: PublishDistributorType.iosAppStore);
 
   @override
   Future<void> publish() async {
@@ -254,9 +269,18 @@ class IosAppStoreDistributor extends PublishDistributor {
 
     final isProduction = commonPublish.stage == PublishStage.production;
 
+    await brewInstallFastlane();
+
+    // Create tmp keychain to be able to run non interactively,
+    // see https://github.com/fastlane/fastlane/blob/df12128496a9a0ad349f8cf8efe6f9288612f2cb/fastlane/lib/fastlane/actions/setup_ci.rb#L37
+    final fastlaneKeychainName = 'fastlane_tmp_keychain';
     await runProcess(
-      'brew',
-      ['install', 'fastlane'],
+      'fastlane',
+      [
+        'run',
+        'setup_ci',
+      ],
+      workingDirectory: _iosDirectory,
     );
 
     // Determine app bundle id
@@ -281,37 +305,126 @@ team_id("$teamId")
     await Directory(_fastlaneDirectory).create(recursive: true);
     await File('$_fastlaneDirectory/Appfile').writeAsString(fastlaneAppfile);
 
-    final envFastlane = {
-      'FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD': applePassword,
-    };
+    final apiPrivateKeyBytes = base64Decode(apiPrivateKeyBase64);
+    final apiPrivateKeyFile = File('$_iosDirectory/AuthKey_$apiKeyId.p8');
+    await apiPrivateKeyFile.writeAsBytes(apiPrivateKeyBytes);
 
-    // Download certificate
-    await runProcess(
-      'fastlane',
-      ['run', 'get_certificates'],
-      workingDirectory: _iosDirectory,
-      environment: envFastlane,
+    final apiKeyArgs = buildApiKeyArgs(
+      apiPrivateKeyFilePath: apiPrivateKeyFile.absolute.path,
+      apiKeyId: apiKeyId,
+      apiIssuerId: apiIssuerId,
+      isTeamEnterprise: isTeamEnterprise,
     );
 
-    // Download provisioning profile
-    await runProcess(
-      'fastlane',
-      ['run', 'get_provisioning_profile', 'filename:AppStore.mobileprovision'],
-      workingDirectory: _iosDirectory,
-      environment: envFastlane,
-    );
+    Future<void> installCertificates({bool isDevelopment = false}) async {
+      final signingIdentity = isDevelopment ? 'Development' : 'Distribution';
 
-    // Update provisioning profile
+      final codeSigningIdentity =
+          'iPhone ${isDevelopment ? 'Developer' : 'Distribution'}';
+      // Disable automatic code signing
+      await runProcess(
+        'fastlane',
+        [
+          'run',
+          'update_code_signing_settings',
+          'use_automatic_signing:false',
+          'path:Runner.xcodeproj',
+          'code_sign_identity:$codeSigningIdentity',
+          'sdk:iphoneos*',
+        ],
+        workingDirectory: _iosDirectory,
+      );
+
+      final p12PrivateKeyBytes =
+          base64Decode(isDevelopment ? '' : distributionPrivateKeyBase64);
+      final distributionPrivateKeyFile =
+          File('$_iosDirectory/$signingIdentity.p12');
+      await distributionPrivateKeyFile.writeAsBytes(p12PrivateKeyBytes);
+
+      // Import private key
+      await runProcess(
+        'fastlane',
+        [
+          'run',
+          'import_certificate',
+          'certificate_path:$signingIdentity.p12',
+          'keychain_name:$fastlaneKeychainName',
+        ],
+        workingDirectory: _iosDirectory,
+      );
+
+      final certBytes =
+          base64Decode(isDevelopment ? '' : distributionCertificateBase64);
+      final certFile = File('$_iosDirectory/$signingIdentity.cer');
+      await certFile.writeAsBytes(certBytes);
+
+      // Import certificate
+      await runProcess(
+        'fastlane',
+        [
+          'run',
+          'import_certificate',
+          'certificate_path:$signingIdentity.cer',
+          'keychain_name:$fastlaneKeychainName',
+        ],
+        workingDirectory: _iosDirectory,
+      );
+
+      // Download provisioning profile
+      await runProcess(
+        'fastlane',
+        [
+          'sigh',
+          // get_provisioning_profile
+          //'filename:$signingIdentity.mobileprovision', // only works for newly created profiles
+          ...apiKeyArgs,
+        ],
+        workingDirectory: _iosDirectory,
+      );
+
+      final provisioningProfilePath =
+          '${isDevelopment ? 'Development' : 'AppStore'}_$bundleId.mobileprovision';
+
+      // Install provisioning profile
+      await runProcess(
+        'fastlane',
+        [
+          'run',
+          'install_provisioning_profile',
+          'path:$provisioningProfilePath',
+        ],
+        workingDirectory: _iosDirectory,
+      );
+
+      // Update provisioning profile
+      await runProcess(
+        'fastlane',
+        [
+          'run',
+          'update_project_provisioning',
+          'xcodeproj:Runner.xcodeproj',
+          // 'build_configuration:${isDevelopment ? '/Debug|Profile/gm' : 'Release'}',
+          // 'build_configuration:${isDevelopment ? 'Debug' : 'Release'}',
+          // 'profile:./$signingIdentity.mobileprovision', // Custom name only working for newly created profiles
+          'profile:$provisioningProfilePath',
+          'code_signing_identity:$codeSigningIdentity',
+        ],
+        workingDirectory: _iosDirectory,
+      );
+    }
+
+    // await installCertificates(isDevelopment: true);
+    await installCertificates(isDevelopment: false);
+
     await runProcess(
       'fastlane',
       [
         'run',
-        'update_project_provisioning',
-        'xcodeproj:./Runner.xcodeproj',
-        'profile:./AppStore.mobileprovision',
+        'update_project_team',
+        'path:Runner.xcodeproj',
+        'teamid:$teamId',
       ],
       workingDirectory: _iosDirectory,
-      environment: envFastlane,
     );
 
     print('Build application...');
@@ -350,7 +463,6 @@ team_id("$teamId")
         'archive_path:../build/ios/archive/Runner.xcarchive',
       ],
       workingDirectory: _iosDirectory,
-      environment: envFastlane,
     );
 
     if (commonPublish.isDryRun) {
@@ -360,21 +472,33 @@ team_id("$teamId")
       if (!isProduction) {
         await runProcess(
           'fastlane',
-          ['pilot', 'upload'],
+          ['pilot', 'upload', ...apiKeyArgs],
           workingDirectory: _iosDirectory,
-          environment: envFastlane,
           printCall: true,
         );
       } else {
         await runProcess(
           'fastlane',
-          ['upload_to_app_store'],
+          ['upload_to_app_store', ...apiKeyArgs],
           workingDirectory: _iosDirectory,
-          environment: envFastlane,
           printCall: true,
         );
       }
     }
+  }
+}
+
+Future<void> brewInstallFastlane() async {
+  try {
+    await runProcess(
+      'which',
+      ['fastlane'],
+    );
+  } catch (_) {
+    await runProcess(
+      'brew',
+      ['install', 'fastlane'],
+    );
   }
 }
 

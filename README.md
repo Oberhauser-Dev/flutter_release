@@ -95,17 +95,20 @@ Support for other app distributors is planned.
 
 ### iOS - App Store
 
-1. `brew install fastlane`
-2. Make sure you have these files ignored in your `./ios/.gitignore`:
+1. Make sure you have these files ignored in your `./ios/.gitignore`:
    ```
    *.cer
    *.certSigningRequest
    *.mobileprovision
    *.p12
+   *.p8
    ```
-3. Create an [app specific password](https://appleid.apple.com/account/manage).
-4. Execute `cd ios && fastlane release`. Follow the steps.
-5. Extract the informations from the `ios/fastlane/Appfile` file.
+2. Create an [App Store connect API Team key](https://appstoreconnect.apple.com/access/integrations/api) with `App Manager` permissions.
+   Copy the key into your `ios` folder. Also copy the `Key ID` and the `Issuer ID` for later.
+3. Execute `flutter_release prepare ios`. Follow the steps.
+   To delete existing certificates, visit: https://developer.apple.com/account/resources/certificates/list
+4. Make sure the certificate is selected in the [App Store provisioning profile](https://developer.apple.com/account/resources/profiles/list)
+5. Extract the information from the `ios/fastlane/Appfile` file.
 6. Run flutter_release
    ```shell
    flutter_release publish ios-app-store \
@@ -115,9 +118,12 @@ Support for other app distributors is planned.
     --build-arg=--dart-define=API_URL=https://example.com \
     --build-arg=--dart-define=API_KEY=12345678 \
     --apple-username=<apple_id> \
-    --apple-password=<app-specific-password> \
+    --api-key-id=<api-key-id> \
+    --api-issuer-id=<api-issuer-id> \
+    --api-private-key-base64=<api-private-key> \
     --content-provider-id=<itc_team_id> \
-    --team-id=<team_id>
+    --team-id=<team_id> \
+    --distribution-private-key-base64=<distribution-private-key>
    ```
 
 ### Web - Server (via Debian only)

@@ -19,9 +19,14 @@ const argFastlaneSecretsJsonBase64 = 'fastlane-secrets-json-base64';
 // Publish: iOS App Store
 const commandIosAppStore = 'ios-app-store';
 const argIosAppleUsername = 'apple-username';
-const argIosApplePassword = 'apple-password';
+const argIosApiKeyId = 'api-key-id';
+const argIosApiIssuerId = 'api-issuer-id';
+const argIosApiPrivateKeyBase64 = 'api-private-key-base64';
 const argIosContentProviderId = 'content-provider-id';
 const argIosTeamId = 'team-id';
+const argIosTeamEnterprise = 'team-enterprise';
+const argIosDistributionPrivateKeyBase64 = 'distribution-private-key-base64';
+const argIosDistributionCertificateBase64 = 'distribution-cert-base64';
 
 // Publish: Web Server
 const commandWebServer = 'web-server';
@@ -129,14 +134,19 @@ class PublishIosAppStoreCommand extends CommonPublishCommand {
   PublishIosAppStoreCommand() {
     argParser
       ..addOption(argIosAppleUsername, mandatory: true, help: 'aka `apple_id`')
-      ..addOption(argIosApplePassword, mandatory: true)
+      ..addOption(argIosApiKeyId, mandatory: true)
+      ..addOption(argIosApiIssuerId, mandatory: true)
+      ..addOption(argIosApiPrivateKeyBase64, mandatory: true)
       ..addOption(
         argIosContentProviderId,
         mandatory: true,
         help: 'aka `itc_team_id`, see: '
             'https://appstoreconnect.apple.com/WebObjects/iTunesConnect.woa/ra/user/detail',
       )
-      ..addOption(argIosTeamId, mandatory: true, help: 'aka `team_id`');
+      ..addOption(argIosTeamId, mandatory: true, help: 'aka `team_id`')
+      ..addFlag(argIosTeamEnterprise, help: 'aka `in_house`')
+      ..addOption(argIosDistributionPrivateKeyBase64, mandatory: true)
+      ..addOption(argIosDistributionCertificateBase64, mandatory: true);
   }
 
   @override
@@ -154,9 +164,16 @@ class PublishIosAppStoreCommand extends CommonPublishCommand {
       commonPublish: commonPublish,
       platformBuild: platformBuild,
       appleUsername: results[argIosAppleUsername] as String,
-      applePassword: results[argIosApplePassword] as String,
+      apiKeyId: results[argIosApiKeyId] as String,
+      apiIssuerId: results[argIosApiIssuerId] as String,
+      apiPrivateKeyBase64: results[argIosApiPrivateKeyBase64] as String,
       contentProviderId: results[argIosContentProviderId] as String,
       teamId: results[argIosTeamId] as String,
+      isTeamEnterprise: results[argIosTeamEnterprise] as bool?,
+      distributionPrivateKeyBase64:
+          results[argIosDistributionPrivateKeyBase64] as String,
+      distributionCertificateBase64:
+          results[argIosDistributionCertificateBase64] as String,
     );
   }
 }
