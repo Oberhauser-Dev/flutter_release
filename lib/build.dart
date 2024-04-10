@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_release/utils/process.dart';
 import 'package:flutter_to_debian/flutter_to_debian.dart';
 
 /// Class which holds the necessary attributes to perform a build on various
@@ -31,24 +32,21 @@ class CommonBuild {
   /// Build the flutter binaries for the platform given in [buildCmd].
   Future<void> flutterBuild({required String buildCmd}) async {
     await Directory(releaseFolder).create(recursive: true);
-    final arguments = [
-      'build',
-      buildCmd,
-      '--build-name',
-      buildVersion,
-      '--build-number',
-      buildNumber.toString(),
-      ...buildArgs,
-    ];
-    print('flutter ${arguments.join(' ')}');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'flutter',
-      arguments,
+      [
+        'build',
+        buildCmd,
+        '--build-name',
+        buildVersion,
+        '--build-number',
+        buildNumber.toString(),
+        ...buildArgs,
+      ],
+      printCall: true,
       // Must run in shell to correctly resolve paths on Windows
       runInShell: true,
     );
-
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
   }
 
   /// Get the output path, where the artifact should be placed.
@@ -202,7 +200,7 @@ class WindowsPlatformBuild extends PlatformBuild {
 
     final artifactPath =
         commonBuild.getArtifactPath(platform: 'windows', extension: 'zip');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'powershell',
       [
         'Compress-Archive',
@@ -213,7 +211,6 @@ class WindowsPlatformBuild extends PlatformBuild {
         artifactPath.replaceAll('/', '\\'),
       ],
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     return artifactPath;
   }
@@ -241,17 +238,9 @@ class LinuxPlatformBuild extends PlatformBuild {
   /// Build the artifact for Linux. It creates a .tar.gz archive.
   Future<String> _buildLinux() async {
     if (commonBuild.installDeps) {
-      ProcessResult result = await Process.run(
-        'sudo',
-        [
-          'apt-get',
-          'update',
-        ],
-        runInShell: true,
-      );
-      if (result.exitCode != 0) throw Exception(result.stderr.toString());
+      await runProcess('sudo', ['apt-get', 'update'], runInShell: true);
 
-      result = await Process.run(
+      await runProcess(
         'sudo',
         [
           'apt-get',
@@ -266,15 +255,13 @@ class LinuxPlatformBuild extends PlatformBuild {
         ],
         runInShell: true,
       );
-
-      if (result.exitCode != 0) throw Exception(result.stderr.toString());
     }
 
     await commonBuild.flutterBuild(buildCmd: 'linux');
 
     final artifactPath =
         commonBuild.getArtifactPath(platform: 'linux', extension: 'tar.gz');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'tar',
       [
         '-czf',
@@ -284,8 +271,6 @@ class LinuxPlatformBuild extends PlatformBuild {
         '.', // Cannot use asterisk with `-C` option, as it's evaluated by shell
       ],
     );
-
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     return artifactPath;
   }
@@ -325,7 +310,7 @@ class MacOsPlatformBuild extends PlatformBuild {
 
     final artifactPath =
         commonBuild.getArtifactPath(platform: 'macos', extension: 'zip');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'ditto',
       [
         '-c',
@@ -336,8 +321,6 @@ class MacOsPlatformBuild extends PlatformBuild {
         artifactPath,
       ],
     );
-
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     return artifactPath;
   }
@@ -358,7 +341,7 @@ class IosPlatformBuild extends PlatformBuild {
 
     final artifactPath =
         commonBuild.getArtifactPath(platform: 'ios', extension: 'zip');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'ditto',
       [
         '-c',
@@ -369,8 +352,6 @@ class IosPlatformBuild extends PlatformBuild {
         artifactPath,
       ],
     );
-
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     return artifactPath;
   }
@@ -415,7 +396,7 @@ class WebPlatformBuild extends PlatformBuild {
 
     final artifactPath =
         commonBuild.getArtifactPath(platform: 'web', extension: 'tar.gz');
-    final ProcessResult result = await Process.run(
+    await runProcess(
       'tar',
       [
         '-czf',
@@ -425,8 +406,6 @@ class WebPlatformBuild extends PlatformBuild {
         'web',
       ],
     );
-
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     return artifactPath;
   }

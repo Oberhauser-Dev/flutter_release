@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_release/flutter_release.dart';
+import 'package:flutter_release/utils/process.dart';
 
 class CommonPublish extends CommonBuild {
   final bool isDryRun;
@@ -95,7 +96,7 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
   @override
   Future<void> publish() async {
     print('Install dependencies...');
-    ProcessResult result = await Process.run(
+    await runProcess(
       'sudo',
       [
         'apt-get',
@@ -107,11 +108,7 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
       runInShell: true,
     );
 
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
-
-    result = await Process.run(
+    await runProcess(
       'sudo',
       [
         'gem',
@@ -120,10 +117,6 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
       ],
       runInShell: true,
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     final buildGradleFile = File('$_androidDirectory/app/build.gradle');
     final buildGradleFileContents = await buildGradleFile.readAsString();
@@ -150,7 +143,7 @@ package_name("$packageName")
     await File('$_fastlaneDirectory/Appfile').writeAsString(fastlaneAppfile);
 
     // Check if play store credentials are valid
-    result = await Process.run(
+    await runProcess(
       'fastlane',
       [
         'run',
@@ -161,10 +154,6 @@ package_name("$packageName")
       runInShell: true,
     );
 
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
-
     final track = switch (commonPublish.stage) {
       PublishStage.production => 'production',
       PublishStage.beta => 'beta',
@@ -173,7 +162,7 @@ package_name("$packageName")
     };
 
     Future<int?> getLastVersionCode() async {
-      result = await Process.run(
+      final result = await runProcess(
         'fastlane',
         [
           'run',
@@ -185,10 +174,7 @@ package_name("$packageName")
         workingDirectory: _androidDirectory,
       );
 
-      if (result.exitCode != 0) {
-        throw Exception(result.stderr.toString());
-      }
-
+      // Get latest version code
       const splitter = LineSplitter();
       final lines = splitter.convert(result.stdout);
       final resultSearchStr = 'Result:';
@@ -208,48 +194,6 @@ package_name("$packageName")
       'Use $versionCode as next version code unless build number is overridden.',
     );
 
-//     final fastlaneFastfile = '''
-// update_fastlane
-//
-// default_platform(:android)
-//
-// platform :android do
-//   desc "Submit a new Alpha Build to internal track"
-//   lane :alpha do
-//     upload_to_play_store(track: 'internal', release_status: 'draft')
-//     slack(message: 'Successfully distributed a new beta build')
-//   end
-//
-//   desc "Submit a new Beta Build to Crashlytics Beta"
-//   lane :beta do
-//     upload_to_play_store(track: 'beta')
-//     slack(message: 'Successfully distributed a new beta build')
-//   end
-//
-//   desc "Deploy a new version to the Google Play"
-//   lane :deploy do
-//     upload_to_play_store
-//     slack(message: 'Successfully distributed a new deploy build')
-//   end
-// end
-//     ''';
-//     await File('$_fastlaneDirectory/Fastfile').writeAsString(fastlaneFastfile);
-
-    // Init fastlane / get metadata
-    // result = await Process.run(
-    //   'fastlane',
-    //   [
-    //     'supply',
-    //     'init',
-    //   ],
-    //   workingDirectory: _androidDirectory,
-    //   runInShell: true,
-    // );
-    //
-    // if (result.exitCode != 0) {
-    //   throw Exception(result.stderr.toString());
-    // }
-
     print('Build application...');
     if (versionCode != null) {
       platformBuild.commonBuild.buildNumber = versionCode;
@@ -261,31 +205,26 @@ package_name("$packageName")
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');
-      final arguments = [
-        'supply',
-        '--aab',
-        outputFile.absolute.path,
-        '--track',
-        track,
-        '--release_status',
-        switch (commonPublish.stage) {
-          PublishStage.production => 'completed',
-          PublishStage.beta => 'completed',
-          PublishStage.alpha => 'completed',
-          _ => 'draft',
-        },
-      ];
-      print('fastlane ${arguments.join(' ')}');
-      result = await Process.run(
+      await runProcess(
         'fastlane',
-        arguments,
+        [
+          'supply',
+          '--aab',
+          outputFile.absolute.path,
+          '--track',
+          track,
+          '--release_status',
+          switch (commonPublish.stage) {
+            PublishStage.production => 'completed',
+            PublishStage.beta => 'completed',
+            PublishStage.alpha => 'completed',
+            _ => 'draft',
+          },
+        ],
         workingDirectory: _androidDirectory,
+        printCall: true,
         runInShell: true,
       );
-
-      if (result.exitCode != 0) {
-        throw Exception(result.stderr.toString());
-      }
     }
   }
 }
@@ -315,11 +254,10 @@ class IosAppStoreDistributor extends PublishDistributor {
 
     final isProduction = commonPublish.stage == PublishStage.production;
 
-    ProcessResult result = await Process.run(
+    await runProcess(
       'brew',
       ['install', 'fastlane'],
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     // Determine app bundle id
     final iosAppInfoFile =
@@ -348,25 +286,23 @@ team_id("$teamId")
     };
 
     // Download certificate
-    result = await Process.run(
+    await runProcess(
       'fastlane',
       ['run', 'get_certificates'],
       workingDirectory: _iosDirectory,
       environment: envFastlane,
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     // Download provisioning profile
-    result = await Process.run(
+    await runProcess(
       'fastlane',
       ['run', 'get_provisioning_profile', 'filename:AppStore.mobileprovision'],
       workingDirectory: _iosDirectory,
       environment: envFastlane,
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     // Update provisioning profile
-    result = await Process.run(
+    await runProcess(
       'fastlane',
       [
         'run',
@@ -377,7 +313,6 @@ team_id("$teamId")
       workingDirectory: _iosDirectory,
       environment: envFastlane,
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     print('Build application...');
 
@@ -406,7 +341,7 @@ team_id("$teamId")
 
     // Build signed ipa
     // https://docs.flutter.dev/deployment/cd
-    result = await Process.run(
+    await runProcess(
       'fastlane',
       [
         'run',
@@ -417,34 +352,27 @@ team_id("$teamId")
       workingDirectory: _iosDirectory,
       environment: envFastlane,
     );
-    if (result.exitCode != 0) throw Exception(result.stderr.toString());
 
     if (commonPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');
       if (!isProduction) {
-        final arguments = ['pilot', 'upload'];
-        print('fastlane ${arguments.join(' ')}');
-        result = await Process.run(
+        await runProcess(
           'fastlane',
-          arguments,
+          ['pilot', 'upload'],
           workingDirectory: _iosDirectory,
           environment: envFastlane,
+          printCall: true,
         );
-
-        if (result.exitCode != 0) throw Exception(result.stderr.toString());
       } else {
-        final arguments = ['upload_to_app_store'];
-        print('fastlane ${arguments.join(' ')}');
-        result = await Process.run(
+        await runProcess(
           'fastlane',
-          arguments,
+          ['upload_to_app_store'],
           workingDirectory: _iosDirectory,
           environment: envFastlane,
+          printCall: true,
         );
-
-        if (result.exitCode != 0) throw Exception(result.stderr.toString());
       }
     }
   }
@@ -480,13 +408,10 @@ class WebServerDistributor extends PublishDistributor {
     final outputFile = File(outputPath);
 
     // Create tmp folder
-    ProcessResult result = await Process.run('mkdir', ['-p', tmpFolder]);
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
+    await runProcess('mkdir', ['-p', tmpFolder]);
 
     // Ensure files are at the correct path.
-    result = await Process.run(
+    await runProcess(
       'tar',
       [
         '-xzf',
@@ -495,10 +420,6 @@ class WebServerDistributor extends PublishDistributor {
         tmpFolder,
       ],
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     final sshConfigFolder = '${Platform.environment['HOME']}/.ssh';
     await Directory(sshConfigFolder).create(recursive: true);
@@ -509,17 +430,13 @@ class WebServerDistributor extends PublishDistributor {
     await sshPrivateKeyFile.writeAsBytes(base64.decode(sshPrivateKeyBase64));
 
     // Set permissions right for private ssh key
-    result = await Process.run(
+    await runProcess(
       'chmod',
       [
         '600',
         sshPrivateKeyFile.path,
       ],
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     final generatePublicKeyArgs = [
       '-y',
@@ -531,31 +448,23 @@ class WebServerDistributor extends PublishDistributor {
         ..add('-P')
         ..add(sshPrivateKeyPassphrase!);
     }
-    result = await Process.run(
+    final result = await runProcess(
       'ssh-keygen',
       generatePublicKeyArgs,
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     final sshPublicKeyFile =
         File('$sshConfigFolder/id_ed25519_flutter_release.pub');
     await sshPublicKeyFile.writeAsString(result.stdout);
 
     // Set permissions right for public ssh key
-    result = await Process.run(
+    await runProcess(
       'chmod',
       [
         '644',
         sshPublicKeyFile.path,
       ],
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     String sanitizedServerPath = webServerPath;
 
@@ -573,7 +482,7 @@ class WebServerDistributor extends PublishDistributor {
       '-i',
       sshPrivateKeyFile.path,
     ];
-    result = await Process.run(
+    await runProcess(
       'ssh',
       [
         '$sshUser@$host',
@@ -581,10 +490,6 @@ class WebServerDistributor extends PublishDistributor {
         '[ -d $sanitizedServerPath ] || (echo Directory $sanitizedServerPath not found >&2 && false)',
       ],
     );
-
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
 
     if (commonPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
@@ -599,19 +504,12 @@ class WebServerDistributor extends PublishDistributor {
       '$sshUser@$host:$sanitizedServerPath',
     ];
     if (commonPublish.isDryRun) rsyncArgs.add('--dry-run');
-    result = await Process.run(
+    await runProcess(
       'rsync',
       rsyncArgs,
     );
 
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
-
     // Remove tmp folder
-    result = await Process.run('rm', ['-r', tmpFolder]);
-    if (result.exitCode != 0) {
-      throw Exception(result.stderr.toString());
-    }
+    await runProcess('rm', ['-r', tmpFolder]);
   }
 }
