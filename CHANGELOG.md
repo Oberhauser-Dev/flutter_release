@@ -1,3 +1,7 @@
+## 0.1.3 - 2024-04-18
+
+- Support Publishing to Apple's iOS App Store
+
 ## 0.1.2 - 2024-04-05
 
 - Support Publishing to a web server

@@ -1,6 +1,6 @@
 # flutter_release
 
-A tool for building and publishing Flutter apps, e.g. on GitHub and Google Play Store.
+A tool for building and publishing Flutter apps, e.g. on GitHub, the Google Play Store and Apple's App Store.
 See also the according [GitHub action](https://github.com/marketplace/actions/flutter-release-action).
 
 ## Example
@@ -125,6 +125,7 @@ Support for other app distributors is planned.
     --team-id=<team_id> \
     --distribution-private-key-base64=<distribution-private-key>
    ```
+   Optionally add the `--team-enterprise` flag, if your team is in the Apple Developer Enterprise Program.
 
 ### Web - Server (via Debian only)
 
