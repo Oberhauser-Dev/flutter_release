@@ -1,3 +1,7 @@
+## 0.1.4 - 2024-04-22
+
+- Fix upload by using API key json path
+
 ## 0.1.3 - 2024-04-18
 
 - Support Publishing to Apple's iOS App Store
