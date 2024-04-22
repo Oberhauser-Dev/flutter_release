@@ -48,11 +48,15 @@ class IosSigningPrepare {
       isTeamEnterprise = true;
     }
 
-    final apiKeyArgs = buildApiKeyArgs(
-      apiPrivateKeyFilePath: apiPrivateKeyFile.absolute.path,
+    final apiPrivateKeyBase64 =
+        base64Encode(await File.fromUri(apiPrivateKeyFile.uri).readAsBytes());
+
+    final apiKeyJsonPath = await generateApiKeyJson(
+      apiPrivateKeyBase64: apiPrivateKeyBase64,
       apiKeyId: apiKeyId,
       apiIssuerId: apiIssuerId,
       isTeamEnterprise: isTeamEnterprise,
+      workingDirectory: _iosDirectory,
     );
 
     Future<void> handleCertificate({required bool isDevelopment}) async {
@@ -68,7 +72,8 @@ class IosSigningPrepare {
             'cert', // get_certificates
             'development:${isDevelopment ? 'true' : 'false'}',
             'force:true',
-            ...apiKeyArgs,
+            '--api_key_path',
+            apiKeyJsonPath,
           ],
           workingDirectory: _iosDirectory,
         );
@@ -93,8 +98,6 @@ class IosSigningPrepare {
       print('$certBase64\n');
     }
 
-    final apiPrivateKeyBase64 =
-        base64Encode(await File.fromUri(apiPrivateKeyFile.uri).readAsBytes());
     print(
         'Base64 Private Key for App Store connect API (api-private-key-base64):\n');
     print('$apiPrivateKeyBase64\n');

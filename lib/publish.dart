@@ -305,15 +305,12 @@ team_id("$teamId")
     await Directory(_fastlaneDirectory).create(recursive: true);
     await File('$_fastlaneDirectory/Appfile').writeAsString(fastlaneAppfile);
 
-    final apiPrivateKeyBytes = base64Decode(apiPrivateKeyBase64);
-    final apiPrivateKeyFile = File('$_iosDirectory/AuthKey_$apiKeyId.p8');
-    await apiPrivateKeyFile.writeAsBytes(apiPrivateKeyBytes);
-
-    final apiKeyArgs = buildApiKeyArgs(
-      apiPrivateKeyFilePath: apiPrivateKeyFile.absolute.path,
+    final apiKeyJsonPath = await generateApiKeyJson(
+      apiPrivateKeyBase64: apiPrivateKeyBase64,
       apiKeyId: apiKeyId,
       apiIssuerId: apiIssuerId,
       isTeamEnterprise: isTeamEnterprise,
+      workingDirectory: _iosDirectory,
     );
 
     Future<void> installCertificates({bool isDevelopment = false}) async {
@@ -377,7 +374,8 @@ team_id("$teamId")
           'sigh',
           // get_provisioning_profile
           //'filename:$signingIdentity.mobileprovision', // only works for newly created profiles
-          ...apiKeyArgs,
+          '--api_key_path',
+          apiKeyJsonPath,
         ],
         workingDirectory: _iosDirectory,
       );
@@ -472,14 +470,15 @@ team_id("$teamId")
       if (!isProduction) {
         await runProcess(
           'fastlane',
-          ['pilot', 'upload', ...apiKeyArgs],
+          // upload_to_testflight
+          ['pilot', 'upload', '--api_key_path', apiKeyJsonPath],
           workingDirectory: _iosDirectory,
           printCall: true,
         );
       } else {
         await runProcess(
           'fastlane',
-          ['upload_to_app_store', ...apiKeyArgs],
+          ['upload_to_app_store', '--api_key_path', apiKeyJsonPath],
           workingDirectory: _iosDirectory,
           printCall: true,
         );
