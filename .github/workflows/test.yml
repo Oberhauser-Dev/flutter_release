@@ -52,7 +52,7 @@ jobs:
         with:
           flutter-version: ${{ inputs.flutter_version }}
           channel: ${{ inputs.flutter_channel }}
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: dart format . --set-exit-if-changed
-      - run: flutter test
+      - uses: bluefireteam/melos-action@v3
+      - run: melos analyze
+      - run: melos format --set-exit-if-changed
+      - run: melos run test

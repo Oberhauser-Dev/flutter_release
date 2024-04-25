@@ -1,0 +1,10 @@
+name: dart_packages
+repository: https://github.com/Oberhauser-dev/dart_packages
+
+packages:
+  - packages/**
+
+scripts:
+  test:
+    run: melos exec dart test
+    description: Run all Flutter tests in this project.
