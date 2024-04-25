@@ -55,10 +55,10 @@ MY_BASE_64="${MY_BASE_64//$'\n'/}"
 
 ## Supported Features
 
-| Platform    | Android |               | iOS             | web          | Windows           | macOS           | Linux  |          |
-|-------------|---------|---------------|-----------------|--------------|-------------------|-----------------|--------|----------|
-| **Build**   | apk     | aab           | ipa             | web          | windows           | macos           | linux  | debian   |
-| **Publish** |         | Google Play ✓ | iOS App Store ✓ | Web Server ✓ | Microsoft Store ❌ | Mac App Store ❌ | Snap ❌ | Ubuntu ❌ |
+| Platform    | Android |               | iOS             | web          | Windows           | macOS           | Linux   |          |
+|-------------|---------|---------------|-----------------|--------------|-------------------|-----------------|---------|----------|
+| **Build**   | apk ✓   | aab ✓         | ipa ❌           | web ✓        | windows ✓         | macos ✓         | linux ✓ | debian ✓ |
+| **Publish** |         | Google Play ✓ | iOS App Store ✓ | Web Server ✓ | Microsoft Store ❌ | Mac App Store ❌ | Snap ❌  | Ubuntu ❌ |
 
 Support for other app distributors is planned.
 

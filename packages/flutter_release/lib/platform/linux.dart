@@ -12,7 +12,7 @@ class LinuxPlatformBuild extends PlatformBuild {
     super.arch = 'x64',
   });
 
-  /// Build the artifact for Windows. It creates a .zip archive.
+  /// Build the artifact for Linux.
   @override
   Future<String> build() async {
     return switch (buildType) {
