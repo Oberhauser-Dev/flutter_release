@@ -1,3 +1,3 @@
 export 'build.dart';
-export 'prepare.dart';
+export 'platform/platform.dart';
 export 'publish.dart';

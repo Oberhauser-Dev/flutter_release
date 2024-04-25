@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_release/prepare.dart';
+import 'package:flutter_release/flutter_release.dart';
 
 const commandPrepare = 'prepare';
 
