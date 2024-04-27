@@ -7,14 +7,14 @@ import 'package:flutter_release/utils/process.dart';
 class MacOsPlatformBuild extends PlatformBuild {
   MacOsPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch = 'x64',
   });
 
   /// Build the artifact for macOS. It creates a .zip archive.
   @override
   Future<String> build() async {
-    await commonBuild.flutterBuild(buildCmd: 'macos');
+    await flutterBuild.build(buildCmd: 'macos');
 
     // The App's build file/folder name (*.app) is not equal to [appName], so must read the actual file name.
     // Must be read out after build!
@@ -22,7 +22,7 @@ class MacOsPlatformBuild extends PlatformBuild {
     final dotAppName = (await appNameFile.readAsString()).trim();
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'macos', extension: 'zip');
+        flutterBuild.getArtifactPath(platform: 'macos', extension: 'zip');
     await runProcess(
       'ditto',
       [

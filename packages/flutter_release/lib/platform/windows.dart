@@ -5,17 +5,17 @@ import 'package:flutter_release/utils/process.dart';
 class WindowsPlatformBuild extends PlatformBuild {
   WindowsPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch = 'x64',
   });
 
   /// Build the artifact for Windows. It creates a .zip archive.
   @override
   Future<String> build() async {
-    await commonBuild.flutterBuild(buildCmd: 'windows');
+    await flutterBuild.build(buildCmd: 'windows');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'windows', extension: 'zip');
+        flutterBuild.getArtifactPath(platform: 'windows', extension: 'zip');
     await runProcess(
       'powershell',
       [

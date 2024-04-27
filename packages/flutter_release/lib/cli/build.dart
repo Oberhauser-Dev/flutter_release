@@ -63,13 +63,13 @@ abstract class CommonBuildCommand extends Command {
 
   BuildType get buildType;
 
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild);
+  PlatformBuild getPlatformBuild(ArgResults results, FlutterBuild flutterBuild);
 
   @override
   FutureOr? run() async {
     final results = argResults;
     if (results == null) throw ArgumentError('No arguments provided');
-    final commonBuild = CommonBuild(
+    final flutterBuild = FlutterBuild(
       appName: results[argAppName] as String,
       appVersion: results[argAppVersion] as String?,
       buildNumber: int.tryParse(results[argBuildNumber] ?? ''),
@@ -77,7 +77,7 @@ abstract class CommonBuildCommand extends Command {
       buildArgs: results[argBuildArg] as List<String>,
       releaseFolder: results[argReleaseFolder] as String?,
     );
-    final platformBuild = getPlatformBuild(results, commonBuild);
+    final platformBuild = getPlatformBuild(results, flutterBuild);
     stdout.writeln(await platformBuild.build());
   }
 }
@@ -96,10 +96,11 @@ abstract class AndroidBuildCommand extends CommonBuildCommand {
   }
 
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return AndroidPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       keyStoreFileBase64: results[argKeyStoreFileBase64] as String?,
       keyStorePassword: results[argKeyStorePassword] as String?,
       keyAlias: results[argKeyAlias] as String?,
@@ -133,10 +134,11 @@ class WindowsBuildCommand extends CommonBuildCommand {
   BuildType buildType = BuildType.windows;
 
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return WindowsPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
@@ -150,10 +152,11 @@ class LinuxBuildCommand extends CommonBuildCommand {
   BuildType buildType = BuildType.linux;
 
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return LinuxPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
@@ -175,10 +178,11 @@ class WebBuildCommand extends CommonBuildCommand {
   BuildType buildType = BuildType.web;
 
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return WebPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       arch: results[argArchitecture] as String?,
     );
   }
@@ -192,10 +196,11 @@ class MacOsBuildCommand extends CommonBuildCommand {
   BuildType buildType = BuildType.macos;
 
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return MacOsPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
@@ -203,10 +208,11 @@ class MacOsBuildCommand extends CommonBuildCommand {
 
 abstract class IosBuildCommand extends CommonBuildCommand {
   @override
-  PlatformBuild getPlatformBuild(ArgResults results, CommonBuild commonBuild) {
+  PlatformBuild getPlatformBuild(
+      ArgResults results, FlutterBuild flutterBuild) {
     return IosPlatformBuild(
       buildType: buildType,
-      commonBuild: commonBuild,
+      flutterBuild: flutterBuild,
       arch: results[argArchitecture] as String?,
     );
   }

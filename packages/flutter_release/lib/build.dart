@@ -4,7 +4,7 @@ import 'package:flutter_release/utils/process.dart';
 
 /// Class which holds the necessary attributes to perform a build on various
 /// platforms for the specified [buildType].
-class CommonBuild {
+class FlutterBuild {
   final String appName;
   final String appVersion;
   String buildVersion;
@@ -13,7 +13,7 @@ class CommonBuild {
   final String releaseFolder;
   final bool installDeps;
 
-  CommonBuild({
+  FlutterBuild({
     required this.appName,
     String? appVersion,
     String? buildVersion,
@@ -28,7 +28,7 @@ class CommonBuild {
         releaseFolder = releaseFolder ?? 'build/releases';
 
   /// Build the flutter binaries for the platform given in [buildCmd].
-  Future<void> flutterBuild({required String buildCmd}) async {
+  Future<void> build({required String buildCmd}) async {
     await Directory(releaseFolder).create(recursive: true);
     await runProcess(
       'flutter',
@@ -88,10 +88,10 @@ enum BuildType {
 abstract class PlatformBuild {
   final String? arch;
   final BuildType buildType;
-  final CommonBuild commonBuild;
+  final FlutterBuild flutterBuild;
 
   PlatformBuild(
-      {this.arch, required this.buildType, required this.commonBuild});
+      {this.arch, required this.buildType, required this.flutterBuild});
 
   /// Release the app for the given platform release type.
   /// Returns the absolute output path.

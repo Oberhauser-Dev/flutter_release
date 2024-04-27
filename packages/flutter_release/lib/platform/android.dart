@@ -17,7 +17,7 @@ class AndroidPlatformBuild extends PlatformBuild {
 
   AndroidPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch,
     this.keyStoreFileBase64,
     this.keyStorePassword,
@@ -27,10 +27,10 @@ class AndroidPlatformBuild extends PlatformBuild {
 
   /// Build the artifact for Android. It creates a .apk installer.
   Future<String> _buildAndroidApk() async {
-    await commonBuild.flutterBuild(buildCmd: 'apk');
+    await flutterBuild.build(buildCmd: 'apk');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'android', extension: 'apk');
+        flutterBuild.getArtifactPath(platform: 'android', extension: 'apk');
     final file = File('build/app/outputs/flutter-apk/app-release.apk');
     await file.rename(artifactPath);
     return artifactPath;
@@ -38,10 +38,10 @@ class AndroidPlatformBuild extends PlatformBuild {
 
   /// Build the artifact for Android. It creates a .aab installer.
   Future<String> _buildAndroidAab() async {
-    await commonBuild.flutterBuild(buildCmd: 'appbundle');
+    await flutterBuild.build(buildCmd: 'appbundle');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'android', extension: 'aab');
+        flutterBuild.getArtifactPath(platform: 'android', extension: 'aab');
     final file = File('build/app/outputs/bundle/release/app-release.aab');
     await file.rename(artifactPath);
     return artifactPath;
@@ -99,7 +99,7 @@ class AndroidGooglePlayDistributor extends PublishDistributor {
   final String fastlaneSecretsJsonBase64;
 
   AndroidGooglePlayDistributor({
-    required super.commonPublish,
+    required super.flutterPublish,
     required super.platformBuild,
     required this.fastlaneSecretsJsonBase64,
   }) : super(distributorType: PublishDistributorType.androidGooglePlay);
@@ -165,7 +165,7 @@ package_name("$packageName")
       runInShell: true,
     );
 
-    final track = switch (commonPublish.stage) {
+    final track = switch (flutterPublish.stage) {
       PublishStage.production => 'production',
       PublishStage.beta => 'beta',
       PublishStage.alpha => 'alpha',
@@ -207,12 +207,12 @@ package_name("$packageName")
 
     print('Build application...');
     if (versionCode != null) {
-      platformBuild.commonBuild.buildNumber = versionCode;
+      platformBuild.flutterBuild.buildNumber = versionCode;
     }
     final outputPath = await platformBuild.build();
     final outputFile = File(outputPath);
 
-    if (commonPublish.isDryRun) {
+    if (flutterPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');
@@ -225,7 +225,7 @@ package_name("$packageName")
           '--track',
           track,
           '--release_status',
-          switch (commonPublish.stage) {
+          switch (flutterPublish.stage) {
             PublishStage.production => 'completed',
             PublishStage.beta => 'completed',
             PublishStage.alpha => 'completed',

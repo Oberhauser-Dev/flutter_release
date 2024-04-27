@@ -9,17 +9,17 @@ import 'package:flutter_release/utils/process.dart';
 class WebPlatformBuild extends PlatformBuild {
   WebPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch,
   });
 
   /// Build the artifact for Web. It creates a .tar.gz archive.
   @override
   Future<String> build() async {
-    await commonBuild.flutterBuild(buildCmd: 'web');
+    await flutterBuild.build(buildCmd: 'web');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'web', extension: 'tar.gz');
+        flutterBuild.getArtifactPath(platform: 'web', extension: 'tar.gz');
     await runProcess(
       'tar',
       [
@@ -47,7 +47,7 @@ class WebServerDistributor extends PublishDistributor {
   static final tmpFolder = '/tmp/flutter_release/build';
 
   WebServerDistributor({
-    required super.commonPublish,
+    required super.flutterPublish,
     required super.platformBuild,
     required this.webServerPath,
     required this.host,
@@ -148,7 +148,7 @@ class WebServerDistributor extends PublishDistributor {
       ],
     );
 
-    if (commonPublish.isDryRun) {
+    if (flutterPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');
@@ -160,7 +160,7 @@ class WebServerDistributor extends PublishDistributor {
       '$tmpFolder/web/', // Must have a trailing slash
       '$sshUser@$host:$sanitizedServerPath',
     ];
-    if (commonPublish.isDryRun) rsyncArgs.add('--dry-run');
+    if (flutterPublish.isDryRun) rsyncArgs.add('--dry-run');
     await runProcess(
       'rsync',
       rsyncArgs,

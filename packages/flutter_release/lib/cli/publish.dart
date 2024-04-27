@@ -57,8 +57,11 @@ abstract class CommonPublishCommand extends Command {
     argParser.addFlag(argDryRun);
   }
 
-  PublishDistributor getPublishDistributor(
-      ArgResults results, CommonPublish commonPublish);
+  PublishDistributor getPublishDistributor({
+    required ArgResults results,
+    required FlutterPublish flutterPublish,
+    required FlutterBuild flutterBuild,
+  });
 
   @override
   FutureOr? run() async {
@@ -68,17 +71,24 @@ abstract class CommonPublishCommand extends Command {
     final stageStr = results[argPublishStage] as String?;
     final isDryRun = results[argDryRun] as bool?;
 
-    final commonPublish = CommonPublish(
+    final flutterPublish = FlutterPublish(
+      isDryRun: isDryRun,
+      stage: stageStr == null ? null : PublishStage.values.byName(stageStr),
+    );
+
+    final flutterBuild = FlutterBuild(
       appName: results[argAppName] as String,
       appVersion: results[argAppVersion] as String?,
       buildNumber: int.tryParse(results[argBuildNumber] ?? ''),
       buildVersion: results[argBuildVersion] as String?,
       buildArgs: results[argBuildArg] as List<String>,
-      isDryRun: isDryRun,
-      stage: stageStr == null ? null : PublishStage.values.byName(stageStr),
     );
 
-    final publishDistributor = getPublishDistributor(results, commonPublish);
+    final publishDistributor = getPublishDistributor(
+      results: results,
+      flutterPublish: flutterPublish,
+      flutterBuild: flutterBuild,
+    );
     await publishDistributor.publish();
     if (isDryRun ?? false) {
       stdout.writeln(
@@ -102,13 +112,14 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
   }
 
   @override
-  PublishDistributor getPublishDistributor(
-    ArgResults results,
-    CommonPublish commonPublish,
-  ) {
+  PublishDistributor getPublishDistributor({
+    required ArgResults results,
+    required FlutterPublish flutterPublish,
+    required FlutterBuild flutterBuild,
+  }) {
     final platformBuild = AndroidPlatformBuild(
       buildType: BuildType.aab,
-      commonBuild: commonPublish,
+      flutterBuild: flutterBuild,
       keyStoreFileBase64: results[argKeyStoreFileBase64] as String?,
       keyStorePassword: results[argKeyStorePassword] as String?,
       keyAlias: results[argKeyAlias] as String?,
@@ -117,7 +128,7 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
     );
 
     return AndroidGooglePlayDistributor(
-      commonPublish: commonPublish,
+      flutterPublish: flutterPublish,
       platformBuild: platformBuild,
       fastlaneSecretsJsonBase64:
           results[argFastlaneSecretsJsonBase64] as String,
@@ -150,18 +161,19 @@ class PublishIosAppStoreCommand extends CommonPublishCommand {
   }
 
   @override
-  PublishDistributor getPublishDistributor(
-    ArgResults results,
-    CommonPublish commonPublish,
-  ) {
+  PublishDistributor getPublishDistributor({
+    required ArgResults results,
+    required FlutterPublish flutterPublish,
+    required FlutterBuild flutterBuild,
+  }) {
     final platformBuild = IosPlatformBuild(
       buildType: BuildType.ipa,
-      commonBuild: commonPublish,
+      flutterBuild: flutterBuild,
       arch: results[argArchitecture] as String?,
     );
 
     return IosAppStoreDistributor(
-      commonPublish: commonPublish,
+      flutterPublish: flutterPublish,
       platformBuild: platformBuild,
       appleUsername: results[argIosAppleUsername] as String,
       apiKeyId: results[argIosApiKeyId] as String,
@@ -195,17 +207,18 @@ class PublishWebServerCommand extends CommonPublishCommand {
   }
 
   @override
-  PublishDistributor getPublishDistributor(
-    ArgResults results,
-    CommonPublish commonPublish,
-  ) {
+  PublishDistributor getPublishDistributor({
+    required ArgResults results,
+    required FlutterPublish flutterPublish,
+    required FlutterBuild flutterBuild,
+  }) {
     final platformBuild = WebPlatformBuild(
       buildType: BuildType.web,
-      commonBuild: commonPublish,
+      flutterBuild: flutterBuild,
     );
 
     return WebServerDistributor(
-      commonPublish: commonPublish,
+      flutterPublish: flutterPublish,
       platformBuild: platformBuild,
       host: results[argWebServerHost] as String,
       port: int.tryParse(results[argWebServerPort] ?? ''),

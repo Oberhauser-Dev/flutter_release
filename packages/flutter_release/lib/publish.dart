@@ -1,22 +1,13 @@
 import 'package:flutter_release/flutter_release.dart';
 
-class CommonPublish extends CommonBuild {
+class FlutterPublish {
   final bool isDryRun;
   final PublishStage? stage;
 
-  CommonPublish({
-    required super.appName,
-    super.appVersion,
-    super.buildVersion,
-    super.buildNumber,
-    super.buildArgs,
-    super.installDeps,
+  FlutterPublish({
     this.stage,
     bool? isDryRun,
-  }) : isDryRun = isDryRun ?? false {
-    // Must be a release for publishing
-    buildArgs.add('--release');
-  }
+  }) : isDryRun = isDryRun ?? false;
 }
 
 /// Enumerates the types of publishing platforms.
@@ -49,13 +40,16 @@ abstract class PublishDistributor {
 
   final PlatformBuild platformBuild;
 
-  final CommonPublish commonPublish;
+  final FlutterPublish flutterPublish;
 
   PublishDistributor({
     required this.distributorType,
     required this.platformBuild,
-    required this.commonPublish,
-  });
+    required this.flutterPublish,
+  }) {
+    // Must be a release for publishing
+    platformBuild.flutterBuild.buildArgs.add('--release');
+  }
 
   Future<void> publish();
 }

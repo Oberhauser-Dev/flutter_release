@@ -133,17 +133,17 @@ class IosSigningPrepare {
 class IosPlatformBuild extends PlatformBuild {
   IosPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch,
   });
 
   /// Build the artifact for iOS App Store. It creates a .ipa bundle.
   Future<String> _buildIosApp() async {
     // TODO: build signed app, independently from publish.
-    await commonBuild.flutterBuild(buildCmd: 'ios');
+    await flutterBuild.build(buildCmd: 'ios');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'ios', extension: 'zip');
+        flutterBuild.getArtifactPath(platform: 'ios', extension: 'zip');
     await runProcess(
       'ditto',
       [
@@ -162,11 +162,11 @@ class IosPlatformBuild extends PlatformBuild {
   /// Build the artifact for iOS App Store. It creates a .ipa bundle.
   Future<String> _buildIosIpa() async {
     // Ipa build will fail resolving the provisioning profile, this is done later by fastlane.
-    await commonBuild.flutterBuild(buildCmd: 'ipa');
+    await flutterBuild.build(buildCmd: 'ipa');
 
     // Does not create ipa at this point
     // final artifactPath =
-    //     commonBuild.getArtifactPath(platform: 'ios', extension: 'ipa');
+    //     flutterBuild.getArtifactPath(platform: 'ios', extension: 'ipa');
     // final file = File('build/app/outputs/flutter-apk/app-release.apk');
     // await file.rename(artifactPath);
     return '';
@@ -203,7 +203,7 @@ class IosAppStoreDistributor extends PublishDistributor {
   final String distributionCertificateBase64;
 
   IosAppStoreDistributor({
-    required super.commonPublish,
+    required super.flutterPublish,
     required super.platformBuild,
     required this.appleUsername,
     required this.apiKeyId,
@@ -221,7 +221,7 @@ class IosAppStoreDistributor extends PublishDistributor {
   Future<void> publish() async {
     print('Install dependencies...');
 
-    final isProduction = commonPublish.stage == PublishStage.production;
+    final isProduction = flutterPublish.stage == PublishStage.production;
 
     await brewInstallFastlane();
 
@@ -382,21 +382,21 @@ team_id("$teamId")
     print('Build application...');
 
     if (!isProduction) {
-      final buildVersion = platformBuild.commonBuild.buildVersion;
+      final buildVersion = platformBuild.flutterBuild.buildVersion;
       // Remove semver suffix
       // See: https://github.com/flutter/flutter/issues/27589
       if (buildVersion.contains('+')) {
-        platformBuild.commonBuild.buildVersion = buildVersion.split('+')[0];
+        platformBuild.flutterBuild.buildVersion = buildVersion.split('+')[0];
         print(
           'Build version was truncated from $buildVersion to '
-          '${platformBuild.commonBuild.buildVersion} as required by app store',
+          '${platformBuild.flutterBuild.buildVersion} as required by app store',
         );
       }
       if (buildVersion.contains('-')) {
-        platformBuild.commonBuild.buildVersion = buildVersion.split('-')[0];
+        platformBuild.flutterBuild.buildVersion = buildVersion.split('-')[0];
         print(
           'Build version was truncated from $buildVersion to '
-          '${platformBuild.commonBuild.buildVersion} as required by app store',
+          '${platformBuild.flutterBuild.buildVersion} as required by app store',
         );
       }
     }
@@ -417,7 +417,7 @@ team_id("$teamId")
       workingDirectory: _iosDirectory,
     );
 
-    if (commonPublish.isDryRun) {
+    if (flutterPublish.isDryRun) {
       print('Did NOT publish: Remove `--dry-run` flag for publishing.');
     } else {
       print('Publish...');

@@ -8,7 +8,7 @@ import 'package:flutter_to_debian/flutter_to_debian.dart';
 class LinuxPlatformBuild extends PlatformBuild {
   LinuxPlatformBuild({
     required super.buildType,
-    required super.commonBuild,
+    required super.flutterBuild,
     super.arch = 'x64',
   });
 
@@ -25,7 +25,7 @@ class LinuxPlatformBuild extends PlatformBuild {
 
   /// Build the artifact for Linux. It creates a .tar.gz archive.
   Future<String> _buildLinux() async {
-    if (commonBuild.installDeps) {
+    if (flutterBuild.installDeps) {
       await runProcess('sudo', ['apt-get', 'update'], runInShell: true);
 
       await runProcess(
@@ -45,10 +45,10 @@ class LinuxPlatformBuild extends PlatformBuild {
       );
     }
 
-    await commonBuild.flutterBuild(buildCmd: 'linux');
+    await flutterBuild.build(buildCmd: 'linux');
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'linux', extension: 'tar.gz');
+        flutterBuild.getArtifactPath(platform: 'linux', extension: 'tar.gz');
     await runProcess(
       'tar',
       [
@@ -68,10 +68,10 @@ class LinuxPlatformBuild extends PlatformBuild {
     await _buildLinux();
 
     final pathToFile = await FlutterToDebian.runBuild(
-        version: commonBuild.buildVersion, arch: arch);
+        version: flutterBuild.buildVersion, arch: arch);
 
     final artifactPath =
-        commonBuild.getArtifactPath(platform: 'linux', extension: 'deb');
+        flutterBuild.getArtifactPath(platform: 'linux', extension: 'deb');
     final file = File(pathToFile);
     await file.rename(artifactPath);
     return artifactPath;
