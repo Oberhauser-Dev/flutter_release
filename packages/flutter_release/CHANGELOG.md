@@ -1,3 +1,11 @@
+## 0.2.0
+
+ - Add dart_release as dependency
+
+ - **REFACTOR**: Make FlutterPublish independent of FlutterBuild.
+ - **REFACTOR**: Split implementations per platform.
+ - **DOCS**: Adapt supported features.
+
 ## 0.1.4 - 2024-04-22
 
 - Fix upload by using API key json path

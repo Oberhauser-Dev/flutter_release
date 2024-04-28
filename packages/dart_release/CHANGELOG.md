@@ -1,3 +1,3 @@
-## 0.1.4 - 2024-04-25
+## 0.2.0
 
-- Initial version.
+ - Initial release

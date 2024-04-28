@@ -1,6 +1,6 @@
 name: flutter_release
 description: A tool for building and publishing Flutter apps, e.g. on GitHub, the Google Play Store and Apple's App Store.
-version: 0.1.4
+version: 0.2.0
 repository: https://github.com/Oberhauser-Dev/dart_packages/packages/flutter_release
 
 environment:
@@ -13,7 +13,7 @@ dependencies:
   args: ^2.4.2
   collection: ^1.18.0
   flutter_to_debian: ^2.0.2
-  dart_release: ^0.1.4
+  dart_release: ^0.2.0
 
 dev_dependencies:
   lints: ^3.0.0
