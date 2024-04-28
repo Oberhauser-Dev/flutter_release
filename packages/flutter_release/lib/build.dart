@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter_release/utils/process.dart';
+import 'package:dart_release/utils.dart';
 
 /// Class which holds the necessary attributes to perform a build on various
 /// platforms for the specified [buildType].

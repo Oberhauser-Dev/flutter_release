@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:dart_release/dart_release.dart';
 import 'package:flutter_release/flutter_release.dart';
 
 import 'build.dart';
@@ -220,12 +221,14 @@ class PublishWebServerCommand extends CommonPublishCommand {
     return WebServerDistributor(
       flutterPublish: flutterPublish,
       platformBuild: platformBuild,
-      host: results[argWebServerHost] as String,
-      port: int.tryParse(results[argWebServerPort] ?? ''),
       webServerPath: results[argWebServerPath] as String,
-      sshUser: results[argWebSshUser] as String,
-      sshPrivateKeyBase64: results[argWebSshPrivateKeyBase64] as String,
-      // sshPrivateKeyPassphrase: results[argWebSshPrivateKeyPassphrase] as String?,
+      serverConnection: WebServerConnection(
+        host: results[argWebServerHost] as String,
+        port: int.tryParse(results[argWebServerPort] ?? ''),
+        sshUser: results[argWebSshUser] as String,
+        sshPrivateKeyBase64: results[argWebSshPrivateKeyBase64] as String,
+        // sshPrivateKeyPassphrase: results[argWebSshPrivateKeyPassphrase] as String?,
+      ),
     );
   }
 }

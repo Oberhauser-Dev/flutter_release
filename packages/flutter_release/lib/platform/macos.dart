@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:dart_release/utils.dart';
 import 'package:flutter_release/build.dart';
-import 'package:flutter_release/utils/process.dart';
 
 /// Build the app for MacOS.
 class MacOsPlatformBuild extends PlatformBuild {

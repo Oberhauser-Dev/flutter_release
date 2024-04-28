@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dart_release/utils.dart';
 import 'package:flutter_release/build.dart';
 import 'package:flutter_release/publish.dart';
-import 'package:flutter_release/utils/cmd_input.dart';
-import 'package:flutter_release/utils/process.dart';
 
 Future<String> generateApiKeyJson({
   required String apiPrivateKeyBase64,

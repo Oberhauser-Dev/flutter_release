@@ -13,6 +13,7 @@ dependencies:
   args: ^2.4.2
   collection: ^1.18.0
   flutter_to_debian: ^2.0.2
+  dart_release: ^0.1.4
 
 dev_dependencies:
   lints: ^3.0.0

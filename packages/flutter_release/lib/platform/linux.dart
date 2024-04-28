@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:dart_release/utils.dart';
 import 'package:flutter_release/build.dart';
-import 'package:flutter_release/utils/process.dart';
 import 'package:flutter_to_debian/flutter_to_debian.dart';
 
 /// Build the app for Linux.
