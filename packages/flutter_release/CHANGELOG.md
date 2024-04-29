@@ -1,3 +1,7 @@
+## 0.2.1
+
+ - **FEAT**: Auto detect arch.
+
 ## 0.2.0
 
  - Add dart_release as dependency
