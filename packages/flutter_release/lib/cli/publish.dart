@@ -125,7 +125,6 @@ class PublishAndroidGooglePlayCommand extends CommonPublishCommand {
       keyStorePassword: results[argKeyStorePassword] as String?,
       keyAlias: results[argKeyAlias] as String?,
       keyPassword: results[argKeyPassword] as String?,
-      arch: results[argArchitecture] as String?,
     );
 
     return AndroidGooglePlayDistributor(
@@ -170,7 +169,6 @@ class PublishIosAppStoreCommand extends CommonPublishCommand {
     final platformBuild = IosPlatformBuild(
       buildType: BuildType.ipa,
       flutterBuild: flutterBuild,
-      arch: results[argArchitecture] as String?,
     );
 
     return IosAppStoreDistributor(

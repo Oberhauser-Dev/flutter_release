@@ -12,7 +12,6 @@ const argBuildNumber = 'build-number';
 const argBuildVersion = 'build-version';
 const argBuildArg = 'build-arg';
 const argReleaseFolder = 'release-folder';
-const argArchitecture = 'arch'; //x64, arm64
 
 // Build
 const commandBuild = 'build';
@@ -48,8 +47,7 @@ void addBuildArgs(ArgParser parser) {
     ..addOption(argAppVersion, abbr: 'v')
     ..addOption(argBuildNumber, abbr: 'b')
     ..addOption(argBuildVersion)
-    ..addMultiOption(argBuildArg, abbr: 'o')
-    ..addOption(argArchitecture);
+    ..addMultiOption(argBuildArg, abbr: 'o');
 }
 
 abstract class CommonBuildCommand extends Command {
@@ -105,7 +103,6 @@ abstract class AndroidBuildCommand extends CommonBuildCommand {
       keyStorePassword: results[argKeyStorePassword] as String?,
       keyAlias: results[argKeyAlias] as String?,
       keyPassword: results[argKeyPassword] as String?,
-      arch: results[argArchitecture] as String?,
     );
   }
 }
@@ -139,7 +136,6 @@ class WindowsBuildCommand extends CommonBuildCommand {
     return WindowsPlatformBuild(
       buildType: buildType,
       flutterBuild: flutterBuild,
-      arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
 }
@@ -157,7 +153,6 @@ class LinuxBuildCommand extends CommonBuildCommand {
     return LinuxPlatformBuild(
       buildType: buildType,
       flutterBuild: flutterBuild,
-      arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
 }
@@ -183,7 +178,6 @@ class WebBuildCommand extends CommonBuildCommand {
     return WebPlatformBuild(
       buildType: buildType,
       flutterBuild: flutterBuild,
-      arch: results[argArchitecture] as String?,
     );
   }
 }
@@ -201,7 +195,6 @@ class MacOsBuildCommand extends CommonBuildCommand {
     return MacOsPlatformBuild(
       buildType: buildType,
       flutterBuild: flutterBuild,
-      arch: (results[argArchitecture] as String?) ?? 'x64',
     );
   }
 }
@@ -213,7 +206,6 @@ abstract class IosBuildCommand extends CommonBuildCommand {
     return IosPlatformBuild(
       buildType: buildType,
       flutterBuild: flutterBuild,
-      arch: results[argArchitecture] as String?,
     );
   }
 }

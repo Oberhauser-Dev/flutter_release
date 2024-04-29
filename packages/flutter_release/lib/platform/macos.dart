@@ -8,7 +8,6 @@ class MacOsPlatformBuild extends PlatformBuild {
   MacOsPlatformBuild({
     required super.buildType,
     required super.flutterBuild,
-    super.arch = 'x64',
   });
 
   /// Build the artifact for macOS. It creates a .zip archive.
@@ -21,8 +20,9 @@ class MacOsPlatformBuild extends PlatformBuild {
     final appNameFile = File('./macos/Flutter/ephemeral/.app_filename');
     final dotAppName = (await appNameFile.readAsString()).trim();
 
-    final artifactPath =
-        flutterBuild.getArtifactPath(platform: 'macos', extension: 'zip');
+    final cpuArchitecture = getCpuArchitecture();
+    final artifactPath = flutterBuild.getArtifactPath(
+        platform: 'macos', arch: cpuArchitecture, extension: 'zip');
     await runProcess(
       'ditto',
       [

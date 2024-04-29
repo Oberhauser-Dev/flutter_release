@@ -18,7 +18,6 @@ class AndroidPlatformBuild extends PlatformBuild {
   AndroidPlatformBuild({
     required super.buildType,
     required super.flutterBuild,
-    super.arch,
     this.keyStoreFileBase64,
     this.keyStorePassword,
     this.keyAlias,

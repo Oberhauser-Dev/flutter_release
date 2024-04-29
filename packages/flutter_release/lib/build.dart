@@ -48,9 +48,12 @@ class FlutterBuild {
   }
 
   /// Get the output path, where the artifact should be placed.
-  String getArtifactPath(
-      {required String platform, required String extension}) {
-    return '$releaseFolder/$appName-$platform-$appVersion.$extension';
+  String getArtifactPath({
+    required String platform,
+    required String extension,
+    String? arch,
+  }) {
+    return '$releaseFolder/$appName-$appVersion-$platform${arch != null ? '-$arch' : ''}.$extension';
   }
 }
 
@@ -86,12 +89,13 @@ enum BuildType {
 
 /// The platform where you want your app to be build for.
 abstract class PlatformBuild {
-  final String? arch;
   final BuildType buildType;
   final FlutterBuild flutterBuild;
 
-  PlatformBuild(
-      {this.arch, required this.buildType, required this.flutterBuild});
+  PlatformBuild({
+    required this.buildType,
+    required this.flutterBuild,
+  });
 
   /// Release the app for the given platform release type.
   /// Returns the absolute output path.

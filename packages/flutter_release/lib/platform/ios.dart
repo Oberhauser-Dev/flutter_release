@@ -133,7 +133,6 @@ class IosPlatformBuild extends PlatformBuild {
   IosPlatformBuild({
     required super.buildType,
     required super.flutterBuild,
-    super.arch,
   });
 
   /// Build the artifact for iOS App Store. It creates a .ipa bundle.

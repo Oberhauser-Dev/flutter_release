@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_release/utils.dart';
-import 'package:flutter_release/build.dart';
+import 'package:flutter_release/flutter_release.dart';
 import 'package:flutter_to_debian/flutter_to_debian.dart';
 
 /// Build the app for Linux.
@@ -9,22 +9,23 @@ class LinuxPlatformBuild extends PlatformBuild {
   LinuxPlatformBuild({
     required super.buildType,
     required super.flutterBuild,
-    super.arch = 'x64',
   });
 
   /// Build the artifact for Linux.
   @override
   Future<String> build() async {
+    final cpuArchitecture = getCpuArchitecture();
+
     return switch (buildType) {
-      BuildType.linux => _buildLinux(),
-      BuildType.debian => _buildDebian(),
+      BuildType.linux => _buildLinux(arch: cpuArchitecture),
+      BuildType.debian => _buildDebian(arch: cpuArchitecture),
       _ => throw UnsupportedError(
           'BuildType $buildType is not available for Linux!'),
     };
   }
 
   /// Build the artifact for Linux. It creates a .tar.gz archive.
-  Future<String> _buildLinux() async {
+  Future<String> _buildLinux({required String arch}) async {
     if (flutterBuild.installDeps) {
       await runProcess('sudo', ['apt-get', 'update'], runInShell: true);
 
@@ -47,15 +48,19 @@ class LinuxPlatformBuild extends PlatformBuild {
 
     await flutterBuild.build(buildCmd: 'linux');
 
-    final artifactPath =
-        flutterBuild.getArtifactPath(platform: 'linux', extension: 'tar.gz');
+    final artifactPath = flutterBuild.getArtifactPath(
+      platform: 'linux',
+      arch: arch,
+      extension: 'tar.gz',
+    );
+    final flutterArch = getFlutterCpuArchitecture(arch);
     await runProcess(
       'tar',
       [
         '-czf',
         artifactPath,
         '-C',
-        'build/linux/$arch/release/bundle',
+        'build/linux/$flutterArch/release/bundle',
         '.', // Cannot use asterisk with `-C` option, as it's evaluated by shell
       ],
     );
@@ -64,14 +69,15 @@ class LinuxPlatformBuild extends PlatformBuild {
   }
 
   /// Build the artifact for Debian. It creates a .deb installer.
-  Future<String> _buildDebian() async {
-    await _buildLinux();
+  Future<String> _buildDebian({required String arch}) async {
+    await _buildLinux(arch: arch);
 
+    final flutterArch = getFlutterCpuArchitecture(arch);
     final pathToFile = await FlutterToDebian.runBuild(
-        version: flutterBuild.buildVersion, arch: arch);
+        version: flutterBuild.buildVersion, arch: flutterArch);
 
-    final artifactPath =
-        flutterBuild.getArtifactPath(platform: 'linux', extension: 'deb');
+    final artifactPath = flutterBuild.getArtifactPath(
+        platform: 'linux', arch: arch, extension: 'deb');
     final file = File(pathToFile);
     await file.rename(artifactPath);
     return artifactPath;

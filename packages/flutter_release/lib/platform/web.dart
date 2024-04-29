@@ -10,7 +10,6 @@ class WebPlatformBuild extends PlatformBuild {
   WebPlatformBuild({
     required super.buildType,
     required super.flutterBuild,
-    super.arch,
   });
 
   /// Build the artifact for Web. It creates a .tar.gz archive.
