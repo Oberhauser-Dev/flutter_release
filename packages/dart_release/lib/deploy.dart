@@ -63,12 +63,13 @@ class WebDeployment extends Deployment {
     );
 
     String sanitizedServerPath = webServerPath;
-    if (!sanitizedServerPath.endsWith('/')) {
-      sanitizedServerPath += '/';
+    if (sanitizedServerPath.endsWith('/')) {
+      sanitizedServerPath =
+          sanitizedServerPath.substring(0, sanitizedServerPath.length - 1);
     }
 
     if (preScriptPath != null) {
-      final preScriptServerPath = '$webServerPath/pre-run.sh';
+      final preScriptServerPath = '$sanitizedServerPath/pre-run.sh';
       await serverConnection.upload(
         sourcePath: preScriptPath!,
         webServerPath: preScriptServerPath,
@@ -79,12 +80,12 @@ class WebDeployment extends Deployment {
 
     await serverConnection.upload(
       sourcePath: '$appTmpFolder/',
-      webServerPath: sanitizedServerPath,
+      webServerPath: '$sanitizedServerPath/',
       isDryRun: dartDeploy.isDryRun,
     );
 
     if (postScriptPath != null) {
-      final postScriptServerPath = '$webServerPath/post-run.sh';
+      final postScriptServerPath = '$sanitizedServerPath/post-run.sh';
       await serverConnection.upload(
         sourcePath: postScriptPath!,
         webServerPath: postScriptServerPath,
