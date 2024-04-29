@@ -15,6 +15,28 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`dart_release` - `v0.2.1`](#dart_release---v021)
+
+---
+
+#### `dart_release` - `v0.2.1`
+
+ - **FIX**: Web server path.
+ - **FEAT**(dart_release): Optional private key.
+
+
+## 2024-04-29
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`flutter_release` - `v0.2.1`](#flutter_release---v021)
 
 ---
