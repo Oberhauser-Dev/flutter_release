@@ -80,7 +80,7 @@ class DeployCommand extends Command {
         host: results[argWebServerHost] as String,
         port: int.tryParse(results[argWebServerPort] ?? ''),
         sshUser: results[argWebSshUser] as String,
-        sshPrivateKeyBase64: results[argWebSshPrivateKeyBase64] as String,
+        sshPrivateKeyBase64: results[argWebSshPrivateKeyBase64] as String?,
         // sshPrivateKeyPassphrase: results[argWebSshPrivateKeyPassphrase] as String?,
       ),
     );

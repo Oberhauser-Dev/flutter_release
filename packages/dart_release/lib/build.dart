@@ -28,9 +28,10 @@ class DartBuild {
   }
 
   /// Build the dart binaries for the platform given in [buildCmd].
-  Future<String> build(
-      {required String platformBuildFolder,
-      required String executableName}) async {
+  Future<String> build({
+    required String platformBuildFolder,
+    required String executableName,
+  }) async {
     await Directory(releaseFolder).create(recursive: true);
     await Directory(platformBuildFolder).create(recursive: true);
     final executable = '$platformBuildFolder/$executableName';

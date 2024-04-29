@@ -62,8 +62,13 @@ Support for other app distributors is planned.
     --build-arg=--define=DB_USER=user \
     --build-arg=--define=DB_PASSWORD=12345678 \
     --host=host.example.com \
-    --path='$HOME/.local/share/example/' \
+    --path=.local/share/example/ \
     --ssh-port=22 \
     --ssh-user=<user> \
-    --ssh-private-key-base64=<private-key>
+    --ssh-private-key-base64=<private-key> \
+    --main-path bin/example.dart \
+    --include-path public \
+    --include-path .env.example \
+    --pre-script deploy-pre-run.sh \
+    --post-script deploy-post-run.sh
    ```

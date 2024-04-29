@@ -109,7 +109,7 @@ class WebServerConnection {
   final String host;
   final int port;
   final String sshUser;
-  final String sshPrivateKeyBase64;
+  final String? sshPrivateKeyBase64;
   final String? sshPrivateKeyPassphrase;
   List<String> sshArgs = [];
 
@@ -117,19 +117,31 @@ class WebServerConnection {
     required this.host,
     int? port,
     required this.sshUser,
-    required this.sshPrivateKeyBase64,
+    this.sshPrivateKeyBase64,
     this.sshPrivateKeyPassphrase,
   }) : port = port ?? 22;
 
   /// Initialize SSH config.
   Future<void> _init() async {
     if (sshArgs.isNotEmpty) return;
+    // User may already have a private key.
+    if (sshPrivateKeyBase64 == null) {
+      sshArgs = [
+        '-p',
+        port.toString(),
+        '-o',
+        'StrictHostKeyChecking=accept-new',
+        '-o',
+        'IdentitiesOnly=yes',
+      ];
+      return;
+    }
     final sshConfigFolder = '${Platform.environment['HOME']}/.ssh';
     await Directory(sshConfigFolder).create(recursive: true);
 
     // Write keys to be able to login to server
     final sshPrivateKeyFile = File('$sshConfigFolder/id_ed25519_dart_release');
-    await sshPrivateKeyFile.writeAsBytes(base64.decode(sshPrivateKeyBase64));
+    await sshPrivateKeyFile.writeAsBytes(base64.decode(sshPrivateKeyBase64!));
 
     // Set permissions right for private ssh key
     await runProcess(
@@ -168,16 +180,10 @@ class WebServerConnection {
       ],
     );
 
-    sshArgs = [
-      '-p',
-      port.toString(),
-      '-o',
-      'StrictHostKeyChecking=accept-new',
-      '-o',
-      'IdentitiesOnly=yes',
+    sshArgs.addAll([
       '-i',
       sshPrivateKeyFile.path,
-    ];
+    ]);
   }
 
   Future<void> run(String cmd) async {
