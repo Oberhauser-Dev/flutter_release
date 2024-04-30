@@ -12,7 +12,7 @@ Future<ProcessResult> runProcess(
   Encoding? stderrEncoding = systemEncoding,
   bool printCall = false,
 }) async {
-  if (printCall) {
+  if (printCall || true) {
     print('$executable ${arguments.join(' ')}');
   }
   final result = await Process.run(
@@ -39,7 +39,7 @@ Future<ProcessResult> runBash(
   Encoding? stderrEncoding = systemEncoding,
   bool printCall = false,
 }) async {
-  if (printCall) {
+  if (printCall || true) {
     print('$executable ${arguments.join(' ')}');
   }
   final result = await Process.run(
