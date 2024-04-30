@@ -15,6 +15,28 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`dart_release` - `v0.2.3`](#dart_release---v023)
+
+---
+
+#### `dart_release` - `v0.2.3`
+
+ - **FIX**: Propagate script paths on deploy.
+ - **FEAT**: Option for build folder and executable name.
+
+
+## 2024-04-30
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`dart_release` - `v0.2.2`](#dart_release---v022)
 
 ---

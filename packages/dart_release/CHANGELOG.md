@@ -1,3 +1,8 @@
+## 0.2.3
+
+ - **FIX**: Propagate script paths on deploy.
+ - **FEAT**: Option for build folder and executable name.
+
 ## 0.2.2
 
  - **FIX**: Provide ssh args with private key.
