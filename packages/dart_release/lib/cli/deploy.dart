@@ -79,6 +79,8 @@ class DeployCommand extends Command {
       dartDeploy: dartDeploy,
       dartBuild: dartBuild,
       webServerPath: results[argWebServerPath] as String,
+      preScriptPath: results[argWebPreScript] as String?,
+      postScriptPath: results[argWebPostScript] as String?,
       serverConnection: WebServerConnection(
         host: results[argWebServerHost] as String,
         port: int.tryParse(results[argWebServerPort] ?? ''),
