@@ -76,7 +76,7 @@ class WebDeployment extends Deployment {
         webServerPath: preScriptServerPath,
         isDryRun: dartDeploy.isDryRun,
       );
-      await serverConnection.run('bash $preScriptServerPath');
+      await serverConnection.run(preScriptServerPath);
     }
 
     await serverConnection.upload(
@@ -92,7 +92,7 @@ class WebDeployment extends Deployment {
         webServerPath: postScriptServerPath,
         isDryRun: dartDeploy.isDryRun,
       );
-      await serverConnection.run('bash $postScriptServerPath');
+      await serverConnection.run(postScriptServerPath);
     }
 
     if (dartDeploy.isDryRun) {
