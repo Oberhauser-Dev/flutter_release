@@ -1,3 +1,7 @@
+## 0.2.2
+
+ - **FIX**: Provide ssh args with private key.
+
 ## 0.2.1
 
  - **FIX**: Web server path.

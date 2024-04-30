@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-04-30
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`dart_release` - `v0.2.2`](#dart_release---v022)
+
+---
+
+#### `dart_release` - `v0.2.2`
+
+ - **FIX**: Provide ssh args with private key.
+
+
 ## 2024-04-29
 
 ### Changes
