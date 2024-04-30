@@ -124,18 +124,21 @@ class WebServerConnection {
   /// Initialize SSH config.
   Future<void> _init() async {
     if (sshArgs.isNotEmpty) return;
+
+    sshArgs = [
+      '-p',
+      port.toString(),
+      '-o',
+      'StrictHostKeyChecking=accept-new',
+      '-o',
+      'IdentitiesOnly=yes',
+    ];
+
     // User may already have a private key.
     if (sshPrivateKeyBase64 == null) {
-      sshArgs = [
-        '-p',
-        port.toString(),
-        '-o',
-        'StrictHostKeyChecking=accept-new',
-        '-o',
-        'IdentitiesOnly=yes',
-      ];
       return;
     }
+
     final sshConfigFolder = '${Platform.environment['HOME']}/.ssh';
     await Directory(sshConfigFolder).create(recursive: true);
 
