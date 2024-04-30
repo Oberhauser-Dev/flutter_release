@@ -55,6 +55,9 @@ class DeployCommand extends Command {
       buildArgs: results[argBuildArg] as List<String>,
       mainPath: results[argMainPath] as String,
       includedPaths: results[argIncludePath] as List<String>,
+      buildFolder: results[argBuildFolder] as String?,
+      executableName: results[argExecName] as String?,
+      releaseFolder: results[argReleaseFolder] as String?,
     );
 
     final deploy = getDeploy(

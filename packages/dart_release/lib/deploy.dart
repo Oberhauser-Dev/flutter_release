@@ -60,6 +60,7 @@ class WebDeployment extends Deployment {
         '-C',
         appTmpFolder,
       ],
+      printCall: true,
     );
 
     String sanitizedServerPath = webServerPath;

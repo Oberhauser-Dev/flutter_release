@@ -48,7 +48,8 @@ Future<ProcessResult> runBash(
     workingDirectory: workingDirectory,
     environment: environment,
     includeParentEnvironment: includeParentEnvironment,
-    runInShell: true, // Needed to work on windows
+    // Needed to work on windows
+    runInShell: true,
     stdoutEncoding: stdoutEncoding,
     stderrEncoding: stderrEncoding,
   );

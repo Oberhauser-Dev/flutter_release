@@ -11,6 +11,8 @@ class DartBuild {
   final String mainPath;
   List<String> buildArgs;
   final String releaseFolder;
+  late final String buildFolder;
+  late final String executableName;
   late final String _arch;
   final List<String> includedPaths;
 
@@ -21,20 +23,31 @@ class DartBuild {
     this.buildArgs = const [],
     String? releaseFolder,
     List<String>? includedPaths,
+    String? buildFolder,
+    String? executableName,
   })  : appVersion = appVersion ?? 'v0.0.1',
         releaseFolder = releaseFolder ?? 'build/releases',
         includedPaths = includedPaths ?? [] {
     _arch = getCpuArchitecture();
+    if (executableName == null) {
+      this.executableName = appName.replaceAll('_', '-');
+      if (Platform.isWindows) {
+        this.executableName += '.exe';
+      }
+    } else {
+      this.executableName = executableName;
+    }
+    if (buildFolder == null) {
+      this.buildFolder = 'bin';
+    } else {
+      this.buildFolder = buildFolder;
+    }
   }
 
   /// Build the dart binaries for the platform given in [buildCmd].
-  Future<String> build({
-    required String platformBuildFolder,
-    required String executableName,
-  }) async {
-    await Directory(releaseFolder).create(recursive: true);
-    await Directory(platformBuildFolder).create(recursive: true);
-    final executable = '$platformBuildFolder/$executableName';
+  Future<String> build() async {
+    await Directory(buildFolder).create(recursive: true);
+    final executable = '$buildFolder/$executableName';
     await runProcess(
       'dart',
       [
@@ -53,13 +66,8 @@ class DartBuild {
   }
 
   Future<String> bundle() async {
-    String execName = appName.replaceAll('_', '-');
-    if (Platform.isWindows) {
-      execName += '.exe';
-    }
-    final platformBuildFolder = 'build/${Platform.operatingSystem}';
-    final executablePath = await build(
-        platformBuildFolder: platformBuildFolder, executableName: execName);
+    await Directory(releaseFolder).create(recursive: true);
+    final executablePath = await build();
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       return await _bundleBash(executablePath: executablePath);
     } else {

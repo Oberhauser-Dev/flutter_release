@@ -11,6 +11,9 @@ const argAppVersion = 'app-version';
 const argBuildArg = 'build-arg';
 const argMainPath = 'main-path';
 const argIncludePath = 'include-path';
+const argBuildFolder = 'build-folder';
+const argExecName = 'exec-name';
+const argReleaseFolder = 'release-folder';
 
 // Build
 const commandBuild = 'build';
@@ -35,6 +38,9 @@ class BuildCommand extends Command {
       buildArgs: results[argBuildArg] as List<String>,
       mainPath: results[argMainPath] as String,
       includedPaths: results[argIncludePath] as List<String>,
+      buildFolder: results[argBuildFolder] as String?,
+      executableName: results[argExecName] as String?,
+      releaseFolder: results[argReleaseFolder] as String?,
     );
     stdout.writeln(await dartBuild.bundle());
   }
@@ -46,5 +52,8 @@ void addBuildArgs(ArgParser parser) {
     ..addOption(argAppVersion, abbr: 'v')
     ..addOption(argMainPath, abbr: 'm', mandatory: true)
     ..addMultiOption(argIncludePath, abbr: 'i')
-    ..addMultiOption(argBuildArg, abbr: 'o');
+    ..addMultiOption(argBuildArg, abbr: 'o')
+    ..addOption(argBuildFolder)
+    ..addOption(argExecName)
+    ..addOption(argReleaseFolder);
 }
