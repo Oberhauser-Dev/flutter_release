@@ -30,10 +30,11 @@ class DartBuild {
         includedPaths = includedPaths ?? [] {
     _arch = getCpuArchitecture();
     if (executableName == null) {
-      this.executableName = appName.replaceAll('_', '-');
+      String execName = appName.replaceAll('_', '-');
       if (Platform.isWindows) {
-        this.executableName += '.exe';
+        execName += '.exe';
       }
+      this.executableName = execName;
     } else {
       this.executableName = executableName;
     }
