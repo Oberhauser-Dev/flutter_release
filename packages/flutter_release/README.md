@@ -87,10 +87,10 @@ Support for other app distributors is planned.
    process, e.g.:
    ```
    flutter build appbundle \
-   --release \
-   --build-name=0.0.1-beta.10 \
-   --dart-define=API_URL=https://example.com \
-   --dart-define=API_KEY=12345678`
+    --release \
+    --build-name=0.0.1-beta.10 \
+    --dart-define=API_URL=https://example.com \
+    --dart-define=API_KEY=12345678
    ```
 
 ### iOS - App Store
