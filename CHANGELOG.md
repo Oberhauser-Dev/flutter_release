@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-05-01
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`dart_release` - `v0.2.4`](#dart_release---v024)
+ - [`flutter_release` - `v0.2.2`](#flutter_release---v022)
+
+---
+
+#### `dart_release` - `v0.2.4`
+
+ - **REFACTOR**: Run deploy scripts without bash.
+ - **FIX**: Set executable name only once on Windows.
+ - **FEAT**: Use ssh controller.
+ - **DOCS**: Adapt README.
+
+#### `flutter_release` - `v0.2.2`
+
+ - **FEAT**: Use ssh controller.
+
+
 ## 2024-04-30
 
 ### Changes

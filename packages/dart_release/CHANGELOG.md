@@ -1,3 +1,10 @@
+## 0.2.4
+
+ - **REFACTOR**: Run deploy scripts without bash.
+ - **FIX**: Set executable name only once on Windows.
+ - **FEAT**: Use ssh controller.
+ - **DOCS**: Adapt README.
+
 ## 0.2.3
 
  - **FIX**: Propagate script paths on deploy.

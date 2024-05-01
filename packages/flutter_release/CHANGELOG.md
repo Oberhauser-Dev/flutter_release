@@ -1,3 +1,7 @@
+## 0.2.2
+
+ - **FEAT**: Use ssh controller.
+
 ## 0.2.1
 
  - **FEAT**: Auto detect arch.
