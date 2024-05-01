@@ -1,5 +1,5 @@
 name: dart_release
-description: A tool for building and publishing Dart apps, e.g. on GitHub, the Microsoft Store, Home Brew and Snap.
+description: A tool for building and publishing Dart apps, e.g. on GitHub or deploying on a Web Server.
 version: 0.2.3
 repository: https://github.com/Oberhauser-Dev/dart_packages/tree/main/packages/dart_release
 

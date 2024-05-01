@@ -1,7 +1,7 @@
 # dart_release
 
-A tool for building and publishing Flutter apps, e.g. on GitHub, the Google Play Store and Apple's App Store.
-See also the according [GitHub action](https://github.com/marketplace/actions/flutter-release-action).
+A tool for building and publishing Dart apps, e.g. on GitHub or deploying on a Web Server.
+See also the according [GitHub action](https://github.com/marketplace/actions/dart-release-action).
 
 ## Example
 
