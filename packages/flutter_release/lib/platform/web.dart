@@ -56,24 +56,29 @@ class WebServerDistributor extends PublishDistributor {
     // Create tmp folder
     await runProcess('mkdir', ['-p', tmpFolder]);
 
-    // Ensure files are at the correct path.
-    await runProcess(
-      'tar',
-      [
-        '-xzf',
-        outputFile.absolute.path,
-        '-C',
-        tmpFolder,
-      ],
-    );
+    try {
+      // Ensure files are at the correct path.
+      await runProcess(
+        'tar',
+        [
+          '-xzf',
+          outputFile.absolute.path,
+          '-C',
+          tmpFolder,
+        ],
+      );
 
-    await serverConnection.upload(
-      sourcePath: tmpFolder,
-      webServerPath: webServerPath,
-      isDryRun: flutterPublish.isDryRun,
-    );
-
-    // Remove tmp folder
-    await runProcess('rm', ['-r', tmpFolder]);
+      await serverConnection.upload(
+        sourcePath: tmpFolder,
+        webServerPath: webServerPath,
+        isDryRun: flutterPublish.isDryRun,
+      );
+    } catch (_) {
+      rethrow;
+    } finally {
+      // Remove tmp folder
+      await runProcess('rm', ['-r', tmpFolder]);
+      await serverConnection.dispose();
+    }
   }
 }
